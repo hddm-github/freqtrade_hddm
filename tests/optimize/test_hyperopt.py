@@ -73,11 +73,11 @@ def test_setup_hyperopt_configuration_without_arguments(mocker, default_conf, ca
     assert "exchange" in config
     assert "pair_whitelist" in config["exchange"]
     assert "datadir" in config
-    assert log_has("Using data directory: {} ...".format(config["datadir"]), caplog)
+    assert log_has("历史数据目录：{}".format(config["datadir"]), caplog)
     assert "timeframe" in config
 
     assert "position_stacking" not in config
-    assert not log_has("Parameter --enable-position-stacking detected ...", caplog)
+    assert not log_has("检测到参数 --enable-position-stacking", caplog)
 
     assert "timerange" not in config
     assert "runmode" in config
@@ -117,15 +117,17 @@ def test_setup_hyperopt_configuration_with_arguments(mocker, default_conf, caplo
     assert "datadir" in config
     assert config["runmode"] == RunMode.HYPEROPT
 
-    assert log_has("Using data directory: {} ...".format(config["datadir"]), caplog)
+    assert log_has("历史数据目录：{}".format(config["datadir"]), caplog)
     assert "timeframe" in config
-    assert log_has("Parameter -i/--timeframe detected ... Using timeframe: 1m ...", caplog)
+    assert log_has("检测到参数 -i/--timeframe，使用 K 线周期：1m。", caplog)
 
     assert "position_stacking" in config
-    assert log_has("Parameter --enable-position-stacking detected ...", caplog)
+    assert log_has("检测到参数 --enable-position-stacking，允许同一交易对重复开仓。", caplog)
 
     assert "timerange" in config
-    assert log_has("Parameter --timerange detected: {} ...".format(config["timerange"]), caplog)
+    assert log_has(
+        "检测到参数 --timerange，回测时间范围：{}。".format(config["timerange"]), caplog
+    )
 
     assert "epochs" in config
     assert log_has(
@@ -166,7 +168,7 @@ def test_setup_hyperopt_configuration_stake_amount(mocker, default_conf) -> None
         "--starting-balance",
         "0.5",
     ]
-    with pytest.raises(OperationalException, match=r"Starting balance .* smaller .*"):
+    with pytest.raises(OperationalException, match=r"初始可用余额.*小于每笔投入金额"):
         setup_optimize_configuration(get_args(args), RunMode.HYPEROPT)
 
 

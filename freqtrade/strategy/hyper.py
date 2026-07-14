@@ -106,16 +106,16 @@ class HyperStrategyMixin:
         filename = Path(filename_str).with_suffix(".json")
 
         if filename.is_file():
-            logger.info(f"Loading parameters from file {filename}")
+            logger.info(f"正在从文件加载策略参数：{filename}")
             try:
                 params = HyperoptTools.load_params(filename)
                 if params.get("strategy_name") != self.__class__.__name__:
-                    raise OperationalException("Invalid parameter file provided.")
+                    raise OperationalException("策略参数文件与当前策略不匹配。")
                 return params
             except ValueError:
-                logger.warning("Invalid parameter file format.")
+                logger.warning("策略参数文件格式无效。")
                 return {}
-        logger.info("Found no parameter file.")
+        logger.info("未找到独立的策略参数文件。")
 
         return {}
 
@@ -130,7 +130,14 @@ class HyperStrategyMixin:
         :param hyperopt: Flag indicating if we are in hyperopt mode.
         """
         if not param_values:
-            logger.info(f"No params for {space} found, using default values.")
+            space_name = {
+                "buy": "买入/做多",
+                "sell": "卖出/做空",
+                "enter": "入场",
+                "exit": "退出",
+                "protection": "保护",
+            }.get(space, space)
+            logger.info(f"未找到{space_name}参数配置，使用策略默认值。")
 
         for param_name, param in params.items():
             param.in_space = hyperopt and HyperoptTools.has_space(self.config, space)
@@ -140,14 +147,13 @@ class HyperStrategyMixin:
             if param_values and param_name in param_values:
                 if param.load:
                     param.value = param_values[param_name]
-                    logger.info(f"Strategy Parameter: {param_name} = {param.value}")
+                    logger.info(f"策略参数：{param_name} = {param.value}")
                 else:
                     logger.warning(
-                        f'Parameter "{param_name}" exists, but is disabled. '
-                        f'Default value "{param.value}" used.'
+                        f'参数“{param_name}”存在但已禁用，使用默认值“{param.value}”。'
                     )
             else:
-                logger.info(f"Strategy Parameter(default): {param_name} = {param.value}")
+                logger.info(f"策略参数（默认）：{param_name} = {param.value}")
 
     def get_no_optimize_params(self) -> dict[str, dict]:
         """
@@ -183,11 +189,11 @@ def detect_all_parameters(
                     attr.space = space
                     break
         if attr.space is None:
-            raise DependencyException(f"Cannot determine parameter space for {attr_name}.")
+            raise DependencyException(f"无法确定参数 {attr_name} 所属的优化空间。")
 
         if attr.space in ("all", "default") or attr.space.isidentifier() is False:
             raise DependencyException(
-                f"'{attr.space}' is not a valid space. Parameter: {attr_name}."
+                f"“{attr.space}”不是有效的优化空间，相关参数：{attr_name}。"
             )
         attr.name = attr_name
         result[attr.space][attr_name] = attr

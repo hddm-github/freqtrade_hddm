@@ -111,7 +111,7 @@ def load_data(
     """
     result: dict[str, DataFrame] = {}
     if startup_candles > 0 and timerange:
-        logger.debug(f"Using indicator startup period: {startup_candles} ...")
+        logger.debug(f"指标启动预热期：{startup_candles} 根 K 线。")
 
     data_handler = get_datahandler(datadir, data_format)
 

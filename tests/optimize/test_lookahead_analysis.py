@@ -483,7 +483,7 @@ def test_biased_strategy(lookahead_conf, mocker, caplog, scenario) -> None:
     instance = LookaheadAnalysis(lookahead_conf, strategy_obj)
     instance.start(get_progress_tracker())
     # Assert init correct
-    assert log_has_re(f"Strategy Parameter: scenario = {scenario}", caplog)
+    assert log_has_re(f"策略参数：scenario = {scenario}", caplog)
 
     # check non-biased strategy
     if scenario == "no_bias":

@@ -101,7 +101,7 @@ def __run_backtest_bg(btconfig: Config, job_id: str):
         strategy_name = strat.get_strategy_name()
         if cachedBt.results and strategy_name in cachedBt.results["strategy"]:
             # When previous result hash matches - reuse that result and skip backtesting.
-            logger.info(f"Reusing result of previous backtest for {strategy_name}")
+            logger.info(f"复用策略 {strategy_name} 的历史回测结果。")
         else:
             min_date, max_date = cachedBt.backtest_one_strategy(
                 strat, ApiBG.bt["data"], ApiBG.bt["timerange"]
@@ -136,15 +136,15 @@ def __run_backtest_bg(btconfig: Config, job_id: str):
                 cachedBt.results["metadata"][strategy_name]["strategy"] = strategy_name
         cachedBt.reset_backtest()
         job["status"] = "success"
-        logger.info("Backtest finished.")
+        logger.info("回测已完成。")
 
     except ConfigurationError as e:
-        logger.error(f"Backtesting encountered a configuration Error: {e}")
+        logger.error(f"回测遇到配置错误：{e}")
         job["status"] = "failed"
         job["error"] = str(e)
 
     except (Exception, OperationalException, DependencyException) as e:
-        logger.exception(f"Backtesting caused an error: {e}")
+        logger.exception(f"回测发生错误：{e}")
         job["status"] = "failed"
         job["error"] = str(e)
     finally:
@@ -225,7 +225,9 @@ def api_get_backtest():
         return {
             "status": "running",
             "running": True,
-            "step": detail.get("description", str(BacktestState.STARTUP)),
+            "step": BacktestState.api_value_from_display_name(
+                detail.get("description", str(BacktestState.STARTUP))
+            ),
             "progress": (
                 max(min(detail.get("progress", 0) / detail_total, 1), 0) if detail_total else 0
             ),

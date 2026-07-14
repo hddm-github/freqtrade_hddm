@@ -35,8 +35,8 @@ def setup_optimize_configuration(args: dict[str, Any], method: RunMode) -> dict[
             wallet = fmt_coin(wallet_size, config["stake_currency"])
             stake = fmt_coin(config["stake_amount"], config["stake_currency"])
             raise ConfigurationError(
-                f"Starting balance ({wallet}) is smaller than stake_amount {stake}. "
-                f"Wallet is calculated as `dry_run_wallet * tradable_balance_ratio`."
+                f"初始可用余额（{wallet}）小于每笔投入金额 {stake}。"
+                "可用余额按 `dry_run_wallet * tradable_balance_ratio` 计算。"
             )
 
     return config
@@ -54,7 +54,7 @@ def start_backtesting(args: dict[str, Any]) -> None:
     # Initialize configuration
     config = setup_optimize_configuration(args, RunMode.BACKTEST)
 
-    logger.info("Starting freqtrade in Backtesting mode")
+    logger.info("正在以回测模式启动 Freqtrade。")
 
     # Initialize backtesting object
     backtesting = Backtesting(config)

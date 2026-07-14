@@ -175,8 +175,8 @@ class Backtesting:
         if self.config.get("strategy_list"):
             if self.config.get("freqai", {}).get("enabled", False):
                 logger.warning(
-                    "Using --strategy-list with FreqAI REQUIRES all strategies "
-                    "to have identical feature_engineering_* functions."
+                    "使用 --strategy-list 配合 FreqAI 时，所有策略必须具有完全相同的 "
+                    "feature_engineering_* 函数。"
                 )
             for strat in list(self.config["strategy_list"]):
                 stratconf = deepcopy(self.config)
@@ -191,8 +191,7 @@ class Backtesting:
 
         if "timeframe" not in self.config:
             raise OperationalException(
-                "Timeframe needs to be set in either "
-                "configuration or as cli argument `--timeframe 5m`"
+                "必须在配置文件中设置 K 线周期，或通过命令行参数 `--timeframe 5m` 指定。"
             )
         self.timeframe = str(self.config.get("timeframe"))
         self.timeframe_secs = timeframe_to_seconds(self.timeframe)
@@ -209,7 +208,7 @@ class Backtesting:
         self.pairlists.refresh_pairlist(only_first=self.dynamic_pairlist)
 
         if len(self.pairlists.whitelist) == 0:
-            raise OperationalException("No pair in whitelist.")
+            raise OperationalException("交易对白名单为空。")
         self.set_fee()
         self.precision_mode = self.exchange.precisionMode
         self.precision_mode_price = self.exchange.precision_mode_price
@@ -248,12 +247,12 @@ class Backtesting:
     def _validate_pairlists_for_backtesting(self):
         if "VolumePairList" in self.pairlists.name_list:
             raise OperationalException(
-                "VolumePairList not allowed for backtesting. Please use StaticPairList instead."
+                "回测不允许使用 VolumePairList，请改用 StaticPairList。"
             )
 
         if len(self.strategylist) > 1 and "PrecisionFilter" in self.pairlists.name_list:
             raise OperationalException(
-                "PrecisionFilter not allowed for backtesting multiple strategies."
+                "多策略回测不允许使用 PrecisionFilter。"
             )
 
     def log_once(self, msg: str) -> None:
@@ -268,7 +267,7 @@ class Backtesting:
     def set_fee(self):
         if self.config.get("fee", None) is not None:
             self.fee = self.config["fee"]
-            self.log_once(f"Using fee {self.fee:.4%} from config.")
+            self.log_once(f"使用配置文件中的手续费率 {self.fee:.4%}。")
         else:
             fees = [
                 self.exchange.get_fee(
@@ -278,7 +277,7 @@ class Backtesting:
                 for mt in ("taker", "maker")
             ]
             self.fee = max(fee for fee in fees if fee is not None)
-            self.log_once(f"Using fee {self.fee:.4%} - worst case fee from exchange (lowest tier).")
+            self.log_once(f"使用手续费率 {self.fee:.4%}（交易所最低等级的最保守费率）。")
 
     @staticmethod
     def cleanup():
@@ -293,7 +292,7 @@ class Backtesting:
             self.timeframe_detail_td = timedelta(seconds=timeframe_detail_secs)
             if self.timeframe_secs <= timeframe_detail_secs:
                 raise OperationalException(
-                    "Detail timeframe must be smaller than strategy timeframe."
+                    "回测细节周期必须小于策略主周期。"
                 )
 
         else:
@@ -312,8 +311,8 @@ class Backtesting:
         # Only active in Backtest mode
         if self.dataprovider.runmode in (RunMode.BACKTEST, RunMode.WEBSERVER):
             self.progress = get_progress_tracker(ft_callback=self._progress_callback)
-            self._progress_task_overall = self.progress.add_task("Backtest", total=4)
-            self._progress_task = self.progress.add_task("Backtesting", total=0)
+            self._progress_task_overall = self.progress.add_task("回测总进度", total=4)
+            self._progress_task = self.progress.add_task("回测明细", total=0)
         self.abort = False
 
     def _set_progress_step(self, action: BacktestState, total: float) -> None:
@@ -323,9 +322,11 @@ class Backtesting:
         self.progress.update(
             self._progress_task_overall,
             completed=action.value - 1,
-            description=str(action),
+            description=action.display_name,
         )
-        self.progress.update(self._progress_task, description=str(action), total=total, completed=0)
+        self.progress.update(
+            self._progress_task, description=action.display_name, total=total, completed=0
+        )
 
     def _increment_progress(self, advance: float = 1) -> None:
         """Advance the detail bar within the current phase."""
@@ -375,9 +376,9 @@ class Backtesting:
         min_date, max_date = history.get_timerange(data)
 
         logger.info(
-            f"Loading data from {min_date.strftime(DATETIME_PRINT_FORMAT)} "
-            f"up to {max_date.strftime(DATETIME_PRINT_FORMAT)} "
-            f"({(max_date - min_date).days} days)."
+            f"正在加载 {min_date.strftime(DATETIME_PRINT_FORMAT)} 至 "
+            f"{max_date.strftime(DATETIME_PRINT_FORMAT)} 的数据，"
+            f"共 {(max_date - min_date).days} 天。"
         )
 
         # Adjust startts forward if not enough data is available
@@ -458,8 +459,8 @@ class Backtesting:
 
             if unavailable_pairs:
                 raise OperationalException(
-                    f"Pairs {', '.join(unavailable_pairs)} got no leverage tiers available. "
-                    "It is therefore impossible to backtest with this pair at the moment."
+                    f"交易对 {', '.join(unavailable_pairs)} 没有可用的杠杆档位，"
+                    "目前无法对其进行回测。"
                 )
         else:
             self.futures_data = {}
@@ -1829,7 +1830,7 @@ class Backtesting:
     ):
         self._set_progress_step(BacktestState.ANALYZE, 0)
         strategy_name = strat.get_strategy_name()
-        logger.info(f"Running backtesting for Strategy {strategy_name}")
+        logger.info(f"正在回测策略 {strategy_name}")
         backtest_start_time = dt_now()
         self._set_strategy(strat)
 
@@ -1841,15 +1842,15 @@ class Backtesting:
         preprocessed_tmp = trim_dataframes(preprocessed, timerange, self.required_startup)
 
         if not preprocessed_tmp:
-            raise OperationalException("No data left after adjusting for startup candles.")
+            raise OperationalException("扣除策略启动所需 K 线后，没有剩余数据可供回测。")
 
         # Use preprocessed_tmp for date generation (the trimmed dataframe).
         # Backtesting will re-trim the dataframes after entry/exit signal generation.
         min_date, max_date = history.get_timerange(preprocessed_tmp)
         logger.info(
-            f"Backtesting with data from {min_date.strftime(DATETIME_PRINT_FORMAT)} "
-            f"up to {max_date.strftime(DATETIME_PRINT_FORMAT)} "
-            f"({(max_date - min_date).days} days)."
+            f"实际回测数据区间：{min_date.strftime(DATETIME_PRINT_FORMAT)} 至 "
+            f"{max_date.strftime(DATETIME_PRINT_FORMAT)}，"
+            f"共 {(max_date - min_date).days} 天。"
         )
         # Execute backtest and store results
         results = self.backtest(
@@ -1882,7 +1883,7 @@ class Backtesting:
         min_backtest_date = None
         backtest_cache_age = self.config.get("backtest_cache", constants.BACKTEST_CACHE_DEFAULT)
         if self.timerange.stopts == 0 or self.timerange.stopdt > dt_now():
-            logger.warning("Backtest result caching disabled due to use of open-ended timerange.")
+            logger.warning("使用了开放式时间范围，已禁用回测结果缓存。")
         elif backtest_cache_age == "day":
             min_backtest_date = dt_now() - timedelta(days=1)
         elif backtest_cache_age == "week":
@@ -1916,7 +1917,7 @@ class Backtesting:
         # Progress may be disabled for hyperopt or other utility commands.
         with self.progress or nullcontext():
             data, timerange = self.load_bt_data()
-            logger.info("Dataload complete. Calculating indicators")
+            logger.info("数据加载完成，正在计算指标和交易信号。")
 
             self.load_prior_backtest()
 
@@ -1924,7 +1925,7 @@ class Backtesting:
                 if self.results and strat.get_strategy_name() in self.results["strategy"]:
                     # When previous result hash matches - reuse that result and skip backtesting.
                     logger.info(
-                        f"Reusing result of previous backtest for {strat.get_strategy_name()}"
+                        f"复用策略 {strat.get_strategy_name()} 的历史回测结果。"
                     )
                     continue
                 min_date, max_date = self.backtest_one_strategy(strat, data, timerange)

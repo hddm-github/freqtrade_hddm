@@ -165,7 +165,7 @@ async def async_ccxt_exception(
 def test_init(default_conf, mocker, caplog):
     caplog.set_level(logging.INFO)
     get_patched_exchange(mocker, default_conf)
-    assert log_has("Instance is running with dry_run enabled", caplog)
+    assert log_has("当前实例启用了模拟交易（dry_run）。", caplog)
 
 
 def test_init_ccxt_kwargs(default_conf, mocker, caplog):
@@ -178,7 +178,7 @@ def test_init_ccxt_kwargs(default_conf, mocker, caplog):
     conf["exchange"]["ccxt_async_config"] = {"aiohttp_trust_env": True, "asyncio_loop": True}
     ex = Exchange(conf)
     assert log_has(
-        "Applying additional ccxt config: {'aiohttp_trust_env': True, 'asyncio_loop': True}", caplog
+        "应用额外的 CCXT 配置：{'aiohttp_trust_env': True, 'asyncio_loop': True}", caplog
     )
     assert ex._api_async.aiohttp_trust_env
     assert not ex._api.aiohttp_trust_env
@@ -190,7 +190,7 @@ def test_init_ccxt_kwargs(default_conf, mocker, caplog):
     conf["exchange"]["ccxt_config"] = {"TestKWARG": 11}
     conf["exchange"]["ccxt_sync_config"] = {"TestKWARG44": 11}
     conf["exchange"]["ccxt_async_config"] = {"asyncio_loop": True}
-    asynclogmsg = "Applying additional ccxt config: {'TestKWARG': 11, 'asyncio_loop': True}"
+    asynclogmsg = "应用额外的 CCXT 配置：{'TestKWARG': 11, 'asyncio_loop': True}"
     ex = Exchange(conf)
     assert not ex._api_async.aiohttp_trust_env
     assert hasattr(ex._api, "TestKWARG")
@@ -199,13 +199,13 @@ def test_init_ccxt_kwargs(default_conf, mocker, caplog):
     assert not hasattr(ex._api_async, "TestKWARG44")
 
     assert hasattr(ex._api_async, "TestKWARG")
-    assert log_has("Applying additional ccxt config: {'TestKWARG': 11, 'TestKWARG44': 11}", caplog)
+    assert log_has("应用额外的 CCXT 配置：{'TestKWARG': 11, 'TestKWARG44': 11}", caplog)
     assert log_has(asynclogmsg, caplog)
     # Test additional headers case
     Exchange._ccxt_params = {"hello": "world"}
     ex = Exchange(conf)
 
-    assert log_has("Applying additional ccxt config: {'TestKWARG': 11, 'TestKWARG44': 11}", caplog)
+    assert log_has("应用额外的 CCXT 配置：{'TestKWARG': 11, 'TestKWARG44': 11}", caplog)
     assert ex._api.hello == "world"
     assert ex._ccxt_config == {}
     Exchange._headers = {}
@@ -247,7 +247,7 @@ def test_exchange_resolver(default_conf, mocker, caplog):
     mocker.patch(f"{EXMS}.validate_pricing")
     default_conf["exchange"]["name"] = "zaif"
     exchange = ExchangeResolver.load_exchange(default_conf)
-    msg = r"No .* specific subclass found. Using the generic exchange class instead."
+    msg = r"未找到 .* 专用交易所类，改用通用交易所类。"
     assert isinstance(exchange, Exchange)
     assert log_has_re(msg, caplog)
     caplog.clear()

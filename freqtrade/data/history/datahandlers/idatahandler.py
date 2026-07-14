@@ -413,8 +413,8 @@ class IDataHandler(ABC):
         if pairdf.empty:
             if warn_no_data:
                 logger.warning(
-                    f"No history for {pair}, {candle_type}, {timeframe} found. "
-                    "Use `freqtrade download-data` to download the data"
+                    f"未找到 {pair}（{candle_type}，{timeframe}）的历史数据。"
+                    "请使用 `freqtrade download-data` 下载数据。"
                 )
             return True
         elif warn_price:
@@ -432,8 +432,8 @@ class IDataHandler(ABC):
                     candle_price_gap = max(abs(gaps))
             if candle_price_gap > 0.1:
                 logger.info(
-                    f"Price jump in {pair}, {timeframe}, {candle_type} between two candles "
-                    f"of {candle_price_gap:.2%} detected."
+                    f"检测到 {pair}（{candle_type}，{timeframe}）相邻 K 线间存在 "
+                    f"{candle_price_gap:.2%} 的价格跳空。"
                 )
 
         return False
@@ -455,14 +455,14 @@ class IDataHandler(ABC):
         if timerange.starttype == "date":
             if pairdata.iloc[0]["date"] > timerange.startdt:
                 logger.warning(
-                    f"{pair}, {candle_type}, {timeframe}, "
-                    f"data starts at {pairdata.iloc[0]['date']:%Y-%m-%d %H:%M:%S}"
+                    f"{pair}（{candle_type}，{timeframe}）的数据起始于 "
+                    f"{pairdata.iloc[0]['date']:%Y-%m-%d %H:%M:%S}。"
                 )
         if timerange.stoptype == "date":
             if pairdata.iloc[-1]["date"] < timerange.stopdt:
                 logger.warning(
-                    f"{pair}, {candle_type}, {timeframe}, "
-                    f"data ends at {pairdata.iloc[-1]['date']:%Y-%m-%d %H:%M:%S}"
+                    f"{pair}（{candle_type}，{timeframe}）的数据截止于 "
+                    f"{pairdata.iloc[-1]['date']:%Y-%m-%d %H:%M:%S}。"
                 )
 
     def rename_futures_data(

@@ -252,8 +252,8 @@ class Exchange:
         self._dry_run_open_orders: dict[str, Any] = {}
         self._is_demo_trading = exchange_conf.get("demo_trading", False)
         if self._config["dry_run"]:
-            logger.info("Instance is running with dry_run enabled")
-        logger.info(f"Using CCXT {ccxt.__version__}")
+            logger.info("当前实例启用了模拟交易（dry_run）。")
+        logger.info(f"使用 CCXT {ccxt.__version__}。")
 
         # Don't remove exchange credentials for dry-run or if always_require_api_keys is set
         remove_exchange_credentials(
@@ -289,7 +289,7 @@ class Exchange:
             self._ws_async = self._init_ccxt(exchange_conf, False, ccxt_async_config)
             self._exchange_ws = ExchangeWS(self._config, self._ws_async)
 
-        logger.info(f'Using Exchange "{self.name}"')
+        logger.info(f'使用交易所“{self.name}”。')
         self.required_candle_call_count = 1
         # Converts the interval provided in minutes in config to seconds
         self.markets_refresh_interval: int = (
@@ -407,7 +407,7 @@ class Exchange:
             "privateKey": exchange_config.get("private_key", exchange_config.get("privateKey")),
         }
         if ccxt_kwargs:
-            logger.info("Applying additional ccxt config: %s", ccxt_kwargs)
+            logger.info("应用额外的 CCXT 配置：%s", ccxt_kwargs)
         if self._ccxt_params:
             # Inject static options after the above output to not confuse users.
             ccxt_kwargs = deep_merge_dicts(self._ccxt_params, deepcopy(ccxt_kwargs))
@@ -461,7 +461,7 @@ class Exchange:
     def markets(self) -> dict[str, Any]:
         """exchange ccxt markets"""
         if not self._markets:
-            logger.info("Markets were not loaded. Loading them now..")
+            logger.info("市场规则尚未加载，正在加载。")
             self.reload_markets(True)
         return self._markets
 

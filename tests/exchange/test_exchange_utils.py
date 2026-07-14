@@ -38,24 +38,20 @@ def test_check_exchange(default_conf, caplog) -> None:
     default_conf["runmode"] = RunMode.DRY_RUN
     default_conf.get("exchange").update({"name": "BINANCE"})
     assert check_exchange(default_conf)
-    assert log_has_re(
-        r"Exchange .* is officially supported by the Freqtrade development team\.", caplog
-    )
+    assert log_has_re(r"交易所“.*”已获得 Freqtrade 开发团队的官方支持。", caplog)
     caplog.clear()
 
     # Test an officially supported by Freqtrade team exchange
     default_conf.get("exchange").update({"name": "binance"})
     assert check_exchange(default_conf)
-    assert log_has_re(
-        r"Exchange \"binance\" is officially supported by the Freqtrade development team\.", caplog
-    )
+    assert log_has_re(r"交易所“binance”已获得 Freqtrade 开发团队的官方支持。", caplog)
     caplog.clear()
 
     # Test an officially supported by Freqtrade team exchange
     default_conf.get("exchange").update({"name": "binanceus"})
     assert check_exchange(default_conf)
     assert log_has_re(
-        r"Exchange \"binanceus\" is officially supported by the Freqtrade development team\.",
+        r"交易所“binanceus”已获得 Freqtrade 开发团队的官方支持。",
         caplog,
     )
     caplog.clear()
@@ -63,9 +59,7 @@ def test_check_exchange(default_conf, caplog) -> None:
     # Test an officially supported by Freqtrade team exchange - with remapping
     default_conf.get("exchange").update({"name": "okx"})
     assert check_exchange(default_conf)
-    assert log_has_re(
-        r"Exchange \"okx\" is officially supported by the Freqtrade development team\.", caplog
-    )
+    assert log_has_re(r"交易所“okx”已获得 Freqtrade 开发团队的官方支持。", caplog)
     caplog.clear()
     # Test an available exchange, supported by ccxt
     default_conf.get("exchange").update({"name": "bittrade"})

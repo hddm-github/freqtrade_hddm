@@ -93,7 +93,7 @@ def load_from_files(
     files_loaded = []
     # We expect here a list of config filenames
     for filename in files:
-        logger.info(f"Using config: {filename} ...")
+        logger.info(f"正在读取配置文件：{filename}")
         if filename == "-":
             # Immediately load stdin and return
             return load_config_file(filename)

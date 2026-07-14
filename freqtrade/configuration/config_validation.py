@@ -95,7 +95,7 @@ def validate_config_consistency(conf: dict[str, Any], *, preliminary: bool = Fal
     _validate_demo_trading(conf)
 
     # validate configuration before returning
-    logger.info("Validating configuration ...")
+    logger.info("正在校验配置。")
     validate_config_schema(conf, preliminary=preliminary)
 
 

@@ -78,8 +78,7 @@ def test_load_strategy_base64(dataframe_1m, caplog, default_conf):
     assert "rsi" in strategy.advise_indicators(dataframe_1m, {"pair": "ETH/BTC"})
     # Make sure strategy was loaded from base64 (using temp directory)!!
     assert log_has_re(
-        r"Using resolved strategy SampleStrategy from '"
-        r".*(/|\\).*(/|\\)SampleStrategy\.py'\.\.\.",
+        r"已从“.*(/|\\).*(/|\\)SampleStrategy\.py”加载策略：SampleStrategy。",
         caplog,
     )
 
@@ -93,7 +92,7 @@ def test_load_strategy_invalid_directory(caplog, default_conf, tmp_path):
             "StrategyTestV333", config=default_conf, extra_dir=extra_dir
         )
 
-    assert log_has_re(r"Path .*" + r"some.*path.*" + r".* does not exist", caplog)
+    assert log_has_re(r"路径.*some.*path.*不存在", caplog)
 
 
 def test_load_strategy_skip_other_files(caplog, default_conf, tmp_path):
@@ -179,7 +178,7 @@ def test_strategy_override_minimal_roi(caplog, default_conf):
 
     assert strategy.minimal_roi[0] == 0.5
     assert log_has(
-        "Override strategy 'minimal_roi' with value from the configuration: {'20': 0.1, '0': 0.5}.",
+        "使用配置文件中的值覆盖策略参数“minimal_roi”：{'20': 0.1, '0': 0.5}。",
         caplog,
     )
 
@@ -190,7 +189,7 @@ def test_strategy_override_stoploss(caplog, default_conf):
     strategy = StrategyResolver.load_strategy(default_conf)
 
     assert strategy.stoploss == -0.5
-    assert log_has("Override strategy 'stoploss' with value from the configuration: -0.5.", caplog)
+    assert log_has("使用配置文件中的值覆盖策略参数“stoploss”：-0.5。", caplog)
 
 
 def test_strategy_override_max_open_trades(caplog, default_conf):
@@ -199,9 +198,7 @@ def test_strategy_override_max_open_trades(caplog, default_conf):
     strategy = StrategyResolver.load_strategy(default_conf)
 
     assert strategy.max_open_trades == 7
-    assert log_has(
-        "Override strategy 'max_open_trades' with value from the configuration: 7.", caplog
-    )
+    assert log_has("使用配置文件中的值覆盖策略参数“max_open_trades”：7。", caplog)
 
 
 def test_strategy_override_trailing_stop(caplog, default_conf):
@@ -211,9 +208,7 @@ def test_strategy_override_trailing_stop(caplog, default_conf):
 
     assert strategy.trailing_stop
     assert isinstance(strategy.trailing_stop, bool)
-    assert log_has(
-        "Override strategy 'trailing_stop' with value from the configuration: True.", caplog
-    )
+    assert log_has("使用配置文件中的值覆盖策略参数“trailing_stop”：True。", caplog)
 
 
 def test_strategy_override_trailing_stop_positive(caplog, default_conf):
@@ -229,13 +224,13 @@ def test_strategy_override_trailing_stop_positive(caplog, default_conf):
 
     assert strategy.trailing_stop_positive == -0.1
     assert log_has(
-        "Override strategy 'trailing_stop_positive' with value from the configuration: -0.1.",
+        "使用配置文件中的值覆盖策略参数“trailing_stop_positive”：-0.1。",
         caplog,
     )
 
     assert strategy.trailing_stop_positive_offset == -0.2
     assert log_has(
-        "Override strategy 'trailing_stop_positive' with value from the configuration: -0.1.",
+        "使用配置文件中的值覆盖策略参数“trailing_stop_positive”：-0.1。",
         caplog,
     )
 
@@ -250,7 +245,7 @@ def test_strategy_override_timeframe(caplog, default_conf):
 
     assert strategy.timeframe == 60
     assert strategy.stake_currency == "ETH"
-    assert log_has("Override strategy 'timeframe' with value from the configuration: 60.", caplog)
+    assert log_has("使用配置文件中的值覆盖策略参数“timeframe”：60。", caplog)
 
 
 def test_strategy_override_process_only_new_candles(caplog, default_conf):
@@ -261,7 +256,7 @@ def test_strategy_override_process_only_new_candles(caplog, default_conf):
 
     assert not strategy.process_only_new_candles
     assert log_has(
-        "Override strategy 'process_only_new_candles' with value from the configuration: False.",
+        "使用配置文件中的值覆盖策略参数“process_only_new_candles”：False。",
         caplog,
     )
 
@@ -283,9 +278,9 @@ def test_strategy_override_order_types(caplog, default_conf):
         assert strategy.order_types[method] == order_types[method]
 
     assert log_has(
-        "Override strategy 'order_types' with value from the configuration:"
-        " {'entry': 'market', 'exit': 'limit', 'stoploss': 'limit',"
-        " 'stoploss_on_exchange': True}.",
+        "使用配置文件中的值覆盖策略参数“order_types”："
+        "{'entry': 'market', 'exit': 'limit', 'stoploss': 'limit',"
+        " 'stoploss_on_exchange': True}。",
         caplog,
     )
 
@@ -317,8 +312,8 @@ def test_strategy_override_order_tif(caplog, default_conf):
         assert strategy.order_time_in_force[method] == order_time_in_force[method]
 
     assert log_has(
-        "Override strategy 'order_time_in_force' with value from the configuration:"
-        " {'entry': 'FOK', 'exit': 'GTC'}.",
+        "使用配置文件中的值覆盖策略参数“order_time_in_force”："
+        "{'entry': 'FOK', 'exit': 'GTC'}。",
         caplog,
     )
 
@@ -358,9 +353,7 @@ def test_strategy_override_use_exit_signal(caplog, default_conf):
 
     assert not strategy.use_exit_signal
     assert isinstance(strategy.use_exit_signal, bool)
-    assert log_has(
-        "Override strategy 'use_exit_signal' with value from the configuration: False.", caplog
-    )
+    assert log_has("使用配置文件中的值覆盖策略参数“use_exit_signal”：False。", caplog)
 
 
 def test_strategy_override_use_exit_profit_only(caplog, default_conf):
@@ -387,9 +380,7 @@ def test_strategy_override_use_exit_profit_only(caplog, default_conf):
 
     assert strategy.exit_profit_only
     assert isinstance(strategy.exit_profit_only, bool)
-    assert log_has(
-        "Override strategy 'exit_profit_only' with value from the configuration: True.", caplog
-    )
+    assert log_has("使用配置文件中的值覆盖策略参数“exit_profit_only”：True。", caplog)
 
 
 def test_strategy_max_open_trades_infinity_from_strategy(caplog, default_conf):

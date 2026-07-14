@@ -317,8 +317,8 @@ class DataProvider:
             timerange.subtract_start(tf_seconds * startup_candles)
 
             logger.info(
-                f"Loading data for {pair} {timeframe} "
-                f"from {timerange.start_fmt} to {timerange.stop_fmt}"
+                f"正在加载 {pair} 的 {timeframe} 数据："
+                f"{timerange.start_fmt} 至 {timerange.stop_fmt}"
             )
 
             self.__cached_pairs_backtesting[saved_pair] = load_pair_history(

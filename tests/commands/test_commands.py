@@ -1277,9 +1277,9 @@ def test_start_test_pairlist(mocker, caplog, tickers, default_conf, capsys):
 
     start_test_pairlist(get_args(args))
 
-    assert log_has_re(r"^Using resolved pairlist VolumePairList.*", caplog)
-    assert log_has_re(r"^Using resolved pairlist PrecisionFilter.*", caplog)
-    assert log_has_re(r"^Using resolved pairlist PriceFilter.*", caplog)
+    assert log_has_re(r"^已从.*加载交易对列表：VolumePairList。", caplog)
+    assert log_has_re(r"^已从.*加载交易对列表：PrecisionFilter。", caplog)
+    assert log_has_re(r"^已从.*加载交易对列表：PriceFilter。", caplog)
     captured = capsys.readouterr()
     assert re.match(r"Pairs for .*", captured.out)
     assert re.match("['ETH/BTC', 'TKN/BTC', 'BLK/BTC', 'LTC/BTC', 'XRP/BTC']", captured.out)
@@ -2020,7 +2020,7 @@ def test_backtesting_show(mocker, testdatadir, capsys):
     start_backtesting_show(pargs)
     assert sbr.call_count == 1
     out, _err = capsys.readouterr()
-    assert "Pairs for Strategy" in out
+    assert "按平均收益排序后的交易对" in out
 
 
 def test_start_convert_db(fee, tmp_path):
@@ -2114,7 +2114,7 @@ def test_start_show_config(capsys, caplog):
     assert "Your combined configuration is:" in captured.out
     assert '"max_open_trades":' in captured.out
     assert '"secret": "REDACTED"' not in captured.out
-    assert log_has_re(r"Sensitive information will be shown in the upcoming output.*", caplog)
+    assert log_has_re(r"接下来的输出将包含敏感信息.*", caplog)
 
 
 def test_start_edge():

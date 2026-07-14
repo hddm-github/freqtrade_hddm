@@ -123,9 +123,9 @@ def test_backtest_analysis_on_entry_and_rejected_signals_nomock(
     start_backtesting(args)
 
     captured = capsys.readouterr()
-    assert "BACKTESTING REPORT" in captured.out
-    assert "EXIT REASON STATS" in captured.out
-    assert "LEFT OPEN TRADES REPORT" in captured.out
+    assert "回测总览" in captured.out
+    assert "退出原因统计" in captured.out
+    assert "回测结束时未平仓交易" in captured.out
 
     base_args = [
         "backtesting-analysis",
@@ -363,9 +363,9 @@ def test_backtest_analysis_with_invalid_config(
     start_backtesting(args)
 
     captured = capsys.readouterr()
-    assert "BACKTESTING REPORT" in captured.out
-    assert "EXIT REASON STATS" in captured.out
-    assert "LEFT OPEN TRADES REPORT" in captured.out
+    assert "回测总览" in captured.out
+    assert "退出原因统计" in captured.out
+    assert "回测结束时未平仓交易" in captured.out
 
     base_args = [
         "backtesting-analysis",
@@ -502,9 +502,9 @@ def test_backtest_analysis_on_entry_and_rejected_signals_only_entry_signals(
     start_backtesting(args)
 
     captured = capsys.readouterr()
-    assert "BACKTESTING REPORT" in captured.out
-    assert "EXIT REASON STATS" in captured.out
-    assert "LEFT OPEN TRADES REPORT" in captured.out
+    assert "回测总览" in captured.out
+    assert "退出原因统计" in captured.out
+    assert "回测结束时未平仓交易" in captured.out
 
     base_args = [
         "backtesting-analysis",

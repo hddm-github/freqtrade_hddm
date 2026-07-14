@@ -125,7 +125,7 @@ class TimeRange:
         if not self.starttype or (startup_candles and min_date.timestamp() >= self.startts):
             # If no startts was defined, or backtest-data starts at the defined backtest-date
             logger.warning(
-                "Moving start-date by %s candles to account for startup time.", startup_candles
+                "为预留策略启动时间，将开始日期向后移动 %s 根 K 线。", startup_candles
             )
             self.startts = int(min_date.timestamp() + timeframe_secs * startup_candles)
             self.starttype = "date"

@@ -155,7 +155,7 @@ def test_datahandler_ohlcv_data_min_max(testdatadir):
 
 def test_datahandler__check_empty_df(testdatadir, caplog):
     dh = JsonDataHandler(testdatadir)
-    expected_text = r"Price jump in UNITTEST/USDT, 1h, spot between"
+    expected_text = r"检测到 UNITTEST/USDT（spot，1h）相邻 K 线间存在"
     df = DataFrame(
         [
             [

@@ -87,8 +87,8 @@ def test_text_table_bt_results(capsys):
     text_table_bt_results(pair_results, stake_currency="BTC", title="title")
     text = capsys.readouterr().out
     re.search(
-        r".* Pair .* Trades .* Avg Profit % .* Tot Profit BTC .* Tot Profit % .* "
-        r"Avg Duration .* Win  Draw  Loss  Win% .*",
+        r".* 交易对 .* 交易次数 .* 平均收益率 % .* 累计收益 BTC .* 累计收益率 % .* "
+        r"平均持仓时长 .* 盈利  持平  亏损  胜率% .*",
         text,
     )
     re.search(
@@ -96,7 +96,7 @@ def test_text_table_bt_results(capsys):
         text,
     )
     re.search(
-        r".* TOTAL .* 3 .* 8.33 .* 0.50000000 .* 12.50 .* 0:20:00 .* 2     0     1  66.7 .*", text
+        r".* 合计 .* 3 .* 8.33 .* 0.50000000 .* 12.50 .* 0:20:00 .* 2     0     1  66.7 .*", text
     )
 
 
@@ -530,20 +530,20 @@ def test_text_table_exit_reason(capsys):
     text = capsys.readouterr().out
 
     assert re.search(
-        r".* Exit Reason .* Exits .* Avg Profit % .* Tot Profit BTC .* Tot Profit % .* "
-        r"Avg Duration .* Win  Draw  Loss  Win% .*",
+        r".* 退出原因 .* 退出次数 .* 平均收益率 % .* 累计收益 BTC .* 累计收益率 % .* "
+        r"平均持仓时长 .* 盈利  持平  亏损  胜率% .*",
         text,
     )
     assert re.search(
-        r".* roi .* 2 .* 15.0 .* 0.60000000 .* 2.73 .* 0:20:00 .* 2     0     0   100 .*",
+        r".* 收益目标 .* 2 .* 15.0 .* 0.60000000 .* 2.73 .* 0:20:00 .* 2     0     0   100 .*",
         text,
     )
     assert re.search(
-        r".* stop_loss .* 1 .* -10.0 .* -0.20000000 .* -0.91 .* 0:10:00 .* 0     0     1     0 .*",
+        r".* 止损 .* 1 .* -10.0 .* -0.20000000 .* -0.91 .* 0:10:00 .* 0     0     1     0 .*",
         text,
     )
     assert re.search(
-        r".* TOTAL .* 3 .* 6.67 .* 0.40000000 .* 1.82 .* 0:17:00 .* 2     0     1  66.7 .*", text
+        r".* 合计 .* 3 .* 6.67 .* 0.40000000 .* 1.82 .* 0:17:00 .* 2     0     1  66.7 .*", text
     )
 
 
@@ -605,8 +605,8 @@ def test_text_table_strategy(testdatadir, capsys):
     captured = capsys.readouterr()
     text = captured.out
     assert re.search(
-        r".* Strategy .* Trades .* Avg Profit % .* Tot Profit BTC .* Tot Profit % .* "
-        r"Avg Duration .* Win  Draw  Loss  Win% .* Drawdown .*",
+        r".* 策略 .* 交易次数 .* 平均收益率 % .* 累计收益 BTC .* 累计收益率 % .* "
+        r"平均持仓时长 .* 盈利  持平  亏损  胜率% .* 最大回撤 .*",
         text,
     )
     assert re.search(
@@ -674,11 +674,11 @@ def test_text_table_add_metrics_shows_wallet_ratios(testdatadir, capsys):
     text_table_add_metrics(strat_results)
     text = capsys.readouterr().out
 
-    assert "Sharpe (daily wallet balance)" in text
-    assert "Sortino (daily wallet balance)" in text
-    assert "Calmar (daily wallet balance)" in text
-    assert "Max % of account underwater (balance)" in text
-    assert "Mean profit p-value" in text
+    assert "夏普比率（每日钱包余额）" in text
+    assert "索提诺比率（每日钱包余额）" in text
+    assert "卡玛比率（每日钱包余额）" in text
+    assert "账户最大浮亏比例（钱包）" in text
+    assert "平均收益 p 值" in text
     assert "0.0321" in text
 
 
@@ -739,6 +739,6 @@ def test_show_sorted_pairlist(testdatadir, default_conf, capsys):
     show_sorted_pairlist(default_conf, bt_data)
 
     out, _err = capsys.readouterr()
-    assert "Pairs for Strategy StrategyTestV3: \n[" in out
+    assert "策略 StrategyTestV3 按平均收益排序后的交易对：\n[" in out
     assert "TOTAL" not in out
     assert '"ETH/BTC",  // ' in out

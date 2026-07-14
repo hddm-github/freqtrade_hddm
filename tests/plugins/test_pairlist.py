@@ -1443,15 +1443,15 @@ def test_pairlist_class(mocker, whitelist_conf, markets, pairlist):
     [
         (["ETH/BTC", "TKN/BTC"], ""),
         # TRX/ETH not in markets
-        (["ETH/BTC", "TKN/BTC", "TRX/ETH"], "is not compatible with exchange"),
+        (["ETH/BTC", "TKN/BTC", "TRX/ETH"], "与交易所"),
         # wrong stake
-        (["ETH/BTC", "TKN/BTC", "ETH/USDT"], "is not compatible with your stake currency"),
+        (["ETH/BTC", "TKN/BTC", "ETH/USDT"], "与计价币"),
         # BCH/BTC not available
-        (["ETH/BTC", "TKN/BTC", "BCH/BTC"], "is not compatible with exchange"),
+        (["ETH/BTC", "TKN/BTC", "BCH/BTC"], "与交易所"),
         # BTT/BTC is inactive
-        (["ETH/BTC", "TKN/BTC", "BTT/BTC"], "Market is not active"),
+        (["ETH/BTC", "TKN/BTC", "BTT/BTC"], "市场未激活"),
         # XLTCUSDT is not a valid pair
-        (["ETH/BTC", "TKN/BTC", "XLTCUSDT"], "is not tradable with Freqtrade"),
+        (["ETH/BTC", "TKN/BTC", "XLTCUSDT"], "无法由 Freqtrade 交易"),
     ],
 )
 def test__whitelist_for_active_markets(
@@ -1485,7 +1485,7 @@ def test__whitelist_for_active_markets_empty(mocker, whitelist_conf, pairlist, t
     mocker.patch.multiple(EXMS, markets=PropertyMock(return_value=None), get_tickers=tickers)
     # Assign starting whitelist
     pairlist_handler = freqtrade.pairlists._pairlist_handlers[0]
-    with pytest.raises(OperationalException, match=r"Markets not loaded.*"):
+    with pytest.raises(OperationalException, match=r"市场规则未加载.*"):
         pairlist_handler._whitelist_for_active_markets(["ETH/BTC"])
 
 
@@ -2214,7 +2214,7 @@ def test_FullTradesFilter(mocker, default_conf_usdt, fee, caplog) -> None:
         default_conf_usdt["max_open_trades"] = 4
         pm.refresh_pairlist()
         assert pm.whitelist == []
-        assert log_has_re(r"Whitelist with 0 pairs: \[]", caplog)
+        assert log_has_re(r"交易对白名单共 0 个：\[]", caplog)
 
         list_trades = LocalTrade.get_open_trades()
         assert len(list_trades) == 4
@@ -2234,7 +2234,7 @@ def test_FullTradesFilter(mocker, default_conf_usdt, fee, caplog) -> None:
         default_conf_usdt["max_open_trades"] = 3
         pm.refresh_pairlist()
         assert pm.whitelist == []
-        assert log_has_re(r"Whitelist with 0 pairs: \[]", caplog)
+        assert log_has_re(r"交易对白名单共 0 个：\[]", caplog)
 
 
 @pytest.mark.parametrize(

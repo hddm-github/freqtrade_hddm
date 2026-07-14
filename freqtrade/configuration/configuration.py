@@ -135,7 +135,7 @@ class Configuration:
             config.update({"logfile": self.args["logfile"]})
 
         if "print_colorized" in self.args and not self.args["print_colorized"]:
-            logger.info("Parameter --no-color detected ...")
+            logger.info("检测到参数 --no-color，关闭彩色输出。")
             config.update({"print_colorized": False})
         else:
             config.update({"print_colorized": True})
@@ -164,7 +164,7 @@ class Configuration:
             config.update({"strategy": self.args.get("strategy")})
 
         self._args_to_config(
-            config, argname="strategy_path", logstring="Using additional Strategy lookup path: {}"
+            config, argname="strategy_path", logstring="使用额外的策略查找目录：{}"
         )
 
         if (
@@ -194,7 +194,7 @@ class Configuration:
         # Check exchange parameter here - otherwise `datadir` might be wrong.
         if self.args.get("exchange"):
             config["exchange"]["name"] = self.args["exchange"]
-            logger.info(f"Using exchange {config['exchange']['name']}")
+            logger.info(f"使用交易所 {config['exchange']['name']}。")
 
         if "pair_whitelist" not in config["exchange"]:
             config["exchange"]["pair_whitelist"] = []
@@ -207,18 +207,18 @@ class Configuration:
 
         # reset to user_data_dir so this contains the absolute path.
         config["user_data_dir"] = create_userdata_dir(config["user_data_dir"], create_dir=False)
-        logger.info("Using user-data directory: %s ...", config["user_data_dir"])
+        logger.info("用户数据目录：%s", config["user_data_dir"])
 
         config.update({"datadir": create_datadir(config, self.args.get("datadir"))})
-        logger.info("Using data directory: %s ...", config.get("datadir"))
+        logger.info("历史数据目录：%s", config.get("datadir"))
 
         self._args_to_config(
-            config, argname="exportdirectory", logstring="Using {} as backtest directory ..."
+            config, argname="exportdirectory", logstring="回测结果目录：{}"
         )
 
         if self.args.get("exportfilename"):
             self._args_to_config(
-                config, argname="exportfilename", logstring="Storing backtest results to {} ..."
+                config, argname="exportfilename", logstring="回测结果将保存到：{}"
             )
             config["exportfilename"] = Path(config["exportfilename"])
             if config.get("exportfilename"):
@@ -250,35 +250,35 @@ class Configuration:
         self._args_to_config(
             config,
             argname="timeframe",
-            logstring="Parameter -i/--timeframe detected ... Using timeframe: {} ...",
+            logstring="检测到参数 -i/--timeframe，使用 K 线周期：{}。",
         )
 
         self._args_to_config(
             config,
             argname="position_stacking",
-            logstring="Parameter --enable-position-stacking detected ...",
+            logstring="检测到参数 --enable-position-stacking，允许同一交易对重复开仓。",
         )
 
         self._args_to_config(
             config,
             argname="enable_protections",
-            logstring="Parameter --enable-protections detected, enabling Protections ...",
+            logstring="检测到参数 --enable-protections，启用保护机制。",
         )
 
         self._args_to_config(
             config,
             argname="enable_dynamic_pairlist",
-            logstring="Parameter --enable-dynamic-pairlist detected, enabling dynamic pairlist ...",
+            logstring="检测到参数 --enable-dynamic-pairlist，启用动态交易对列表。",
         )
 
         if self.args.get("max_open_trades"):
             config.update({"max_open_trades": self.args["max_open_trades"]})
             logger.info(
-                "Parameter --max-open-trades detected, overriding max_open_trades to: %s ...",
+                "检测到参数 --max-open-trades，最大同时持仓数设置为：%s。",
                 config.get("max_open_trades"),
             )
         elif config["runmode"] in NON_UTIL_MODES:
-            logger.info("Using max_open_trades: %s ...", config.get("max_open_trades"))
+            logger.info("最大同时持仓数：%s。", config.get("max_open_trades"))
         # Setting max_open_trades to infinite if -1
         if config.get("max_open_trades") == -1:
             config["max_open_trades"] = float("inf")
@@ -293,19 +293,19 @@ class Configuration:
         configurations = [
             (
                 "timeframe_detail",
-                "Parameter --timeframe-detail detected, using {} for intra-candle backtesting ...",
+                "检测到参数 --timeframe-detail，使用 {} 进行 K 线内部精细回测。",
             ),
-            ("backtest_show_pair_list", "Parameter --show-pair-list detected."),
+            ("backtest_show_pair_list", "检测到参数 --show-pair-list。"),
             (
                 "stake_amount",
-                "Parameter --stake-amount detected, overriding stake_amount to: {} ...",
+                "检测到参数 --stake-amount，每笔投入设置为：{}。",
             ),
             (
                 "dry_run_wallet",
-                "Parameter --dry-run-wallet detected, overriding dry_run_wallet to: {} ...",
+                "检测到参数 --dry-run-wallet，回测初始余额设置为：{}。",
             ),
-            ("fee", "Parameter --fee detected, setting fee to: {} ..."),
-            ("timerange", "Parameter --timerange detected: {} ..."),
+            ("fee", "检测到参数 --fee，手续费率设置为：{}。"),
+            ("timerange", "检测到参数 --timerange，回测时间范围：{}。"),
         ]
 
         self._args_to_config_loop(config, configurations)
@@ -314,29 +314,30 @@ class Configuration:
 
         if self.args.get("show_sensitive"):
             logger.warning(
-                "Sensitive information will be shown in the upcoming output. "
-                "Please make sure to never share this output without redacting "
-                "the information yourself."
+                "接下来的输出将包含敏感信息。分享输出前，请务必自行遮盖敏感内容。"
             )
 
         self._args_to_config(
             config,
             argname="strategy_list",
-            logstring="Using strategy list of {} strategies",
+            logstring="使用包含 {} 个策略的策略列表。",
             logfun=len,
         )
 
         configurations = [
             (
                 "recursive_strategy_search",
-                "Recursively searching for a strategy in the strategies folder.",
+                "正在递归搜索策略目录。",
             ),
-            ("export", "Parameter --export detected: {} ..."),
-            ("backtest_breakdown", "Parameter --breakdown detected ..."),
-            ("backtest_cache", "Parameter --cache={} detected ..."),
-            ("disableparamexport", "Parameter --disableparamexport detected: {} ..."),
-            ("freqai_backtest_live_models", "Parameter --freqai-backtest-live-models detected ..."),
-            ("backtest_notes", "Parameter --notes detected: {} ..."),
+            ("export", "检测到参数 --export：{}。"),
+            ("backtest_breakdown", "检测到参数 --breakdown，启用分期统计。"),
+            ("backtest_cache", "检测到参数 --cache={}。"),
+            ("disableparamexport", "检测到参数 --disableparamexport：{}。"),
+            (
+                "freqai_backtest_live_models",
+                "检测到参数 --freqai-backtest-live-models，将使用实盘模型进行回测。",
+            ),
+            ("backtest_notes", "检测到参数 --notes，回测备注：{}。"),
         ]
         self._args_to_config_loop(config, configurations)
 
@@ -395,7 +396,7 @@ class Configuration:
 
     def _process_plot_options(self, config: Config) -> None:
         configurations = [
-            ("pairs", "Using pairs {}"),
+            ("pairs", "使用交易对：{}"),
             ("indicators1", "Using indicators1: {}"),
             ("indicators2", "Using indicators2: {}"),
             ("trade_ids", "Filtering on trade_ids: {}"),
@@ -444,7 +445,7 @@ class Configuration:
             ("indicator_list", "Analysis indicator list: {}"),
             ("entry_only", "Only analyze entry signals: {}"),
             ("exit_only", "Only analyze exit signals: {}"),
-            ("timerange", "Filter trades by timerange: {}"),
+            ("timerange", "按时间范围筛选交易：{}"),
             ("analysis_rejected", "Analyse rejected signals: {}"),
             ("analysis_to_csv", "Store analysis tables to CSV: {}"),
             ("analysis_csv_path", "Path to store analysis CSVs: {}"),
@@ -541,7 +542,7 @@ class Configuration:
             return
 
         if self.args.get("config"):
-            logger.info("Using pairlist from configuration.")
+            logger.info("使用配置文件中的交易对列表。")
             config["pairs"] = config.get("exchange", {}).get("pair_whitelist")
         else:
             # Fall back to /dl_path/pairs.json

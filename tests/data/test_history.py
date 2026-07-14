@@ -75,8 +75,8 @@ def test_load_data_7min_timeframe(caplog, testdatadir) -> None:
     assert isinstance(ld, DataFrame)
     assert ld.empty
     assert log_has(
-        "No history for UNITTEST/BTC, spot, 7m found. "
-        "Use `freqtrade download-data` to download the data",
+        "未找到 UNITTEST/BTC（spot，7m）的历史数据。"
+        "请使用 `freqtrade download-data` 下载数据。",
         caplog,
     )
 
@@ -137,8 +137,8 @@ def test_load_data_with_new_pair_1min(
     load_pair_history(datadir=tmp_path, timeframe="1m", pair="MEME/BTC", candle_type=candle_type)
     assert not file.is_file()
     assert log_has(
-        f"No history for MEME/BTC, {candle_type}, 1m found. "
-        "Use `freqtrade download-data` to download the data",
+        f"未找到 MEME/BTC（{candle_type}，1m）的历史数据。"
+        "请使用 `freqtrade download-data` 下载数据。",
         caplog,
     )
 
@@ -406,13 +406,14 @@ def test_load_partial_missing(testdatadir, caplog) -> None:
         startup_candles=20,
         timerange=TimeRange("date", "date", start.timestamp(), end.timestamp()),
     )
-    assert log_has("Using indicator startup period: 20 ...", caplog)
+    assert log_has("指标启动预热期：20 根 K 线。", caplog)
     # timedifference in 5 minutes
     td = ((end - start).total_seconds() // 60 // 5) + 1
     assert td != len(data["UNITTEST/BTC"])
     start_real = data["UNITTEST/BTC"].iloc[0, 0]
     assert log_has(
-        f"UNITTEST/BTC, spot, 5m, data starts at {start_real.strftime(DATETIME_PRINT_FORMAT)}",
+        f"UNITTEST/BTC（spot，5m）的数据起始于 "
+        f"{start_real.strftime(DATETIME_PRINT_FORMAT)}。",
         caplog,
     )
     # Make sure we start fresh - test missing data at end
@@ -432,7 +433,8 @@ def test_load_partial_missing(testdatadir, caplog) -> None:
     # Shift endtime with +5
     end_real = data["UNITTEST/BTC"].iloc[-1, 0].to_pydatetime()
     assert log_has(
-        f"UNITTEST/BTC, spot, 5m, data ends at {end_real.strftime(DATETIME_PRINT_FORMAT)}",
+        f"UNITTEST/BTC（spot，5m）的数据截止于 "
+        f"{end_real.strftime(DATETIME_PRINT_FORMAT)}。",
         caplog,
     )
 

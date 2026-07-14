@@ -62,18 +62,18 @@ def main(sysargv: list[str] | None = None) -> None:
             )
 
     except KeyboardInterrupt:
-        logger.info("SIGINT received, aborting ...")
+        logger.info("收到中断信号，正在停止。")
         return_code = 130
     except ConfigurationError as e:
         logger.error(
-            f"Configuration error: {e}\n"
-            f"Please make sure to review the documentation at {DOCS_LINK}."
+            f"配置错误：{e}\n"
+            f"请检查配置并参阅文档：{DOCS_LINK}"
         )
     except FreqtradeException as e:
         logger.error(str(e))
         return_code = 2
     except Exception:
-        logger.exception("Fatal exception!")
+        logger.exception("发生严重异常！")
         return_code = 1
     finally:
         sys.exit(return_code)

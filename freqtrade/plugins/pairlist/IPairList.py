@@ -237,17 +237,14 @@ class IPairList(LoggingMixin, ABC):
         """
         markets = self._exchange.markets
         if not markets:
-            raise OperationalException(
-                "Markets not loaded. Make sure that exchange is initialized correctly."
-            )
+            raise OperationalException("市场规则未加载，请确认交易所已正确初始化。")
 
         sanitized_whitelist: list[str] = []
         for pair in pairlist:
             # pair is not in the generated dynamic market or has the wrong stake currency
             if pair not in markets:
                 self.log_once(
-                    f"Pair {pair} is not compatible with exchange "
-                    f"{self._exchange.name}. Removing it from whitelist..",
+                    f"交易对 {pair} 与交易所 {self._exchange.name} 不兼容，已从白名单中移除。",
                     logger.warning,
                     True,
                 )
@@ -255,7 +252,7 @@ class IPairList(LoggingMixin, ABC):
 
             if not self._exchange.market_is_tradable(markets[pair]):
                 self.log_once(
-                    f"Pair {pair} is not tradable with Freqtrade. Removing it from whitelist..",
+                    f"交易对 {pair} 无法由 Freqtrade 交易，已从白名单中移除。",
                     logger.warning,
                     True,
                 )
@@ -263,8 +260,8 @@ class IPairList(LoggingMixin, ABC):
 
             if self._exchange.get_pair_quote_currency(pair) != self._config["stake_currency"]:
                 self.log_once(
-                    f"Pair {pair} is not compatible with your stake currency "
-                    f"{self._config['stake_currency']}. Removing it from whitelist..",
+                    f"交易对 {pair} 与计价币 {self._config['stake_currency']} 不兼容，"
+                    "已从白名单中移除。",
                     logger.warning,
                     True,
                 )
@@ -274,7 +271,7 @@ class IPairList(LoggingMixin, ABC):
             market = markets[pair]
             if not market_is_active(market):
                 self.log_once(
-                    f"Ignoring {pair} from whitelist. Market is not active.",
+                    f"交易对 {pair} 的市场未激活，已从白名单中忽略。",
                     logger.info,
                     True,
                 )

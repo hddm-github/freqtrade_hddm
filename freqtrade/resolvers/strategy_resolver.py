@@ -87,7 +87,7 @@ class StrategyResolver(IResolver):
         # Loop this list again to have output combined
         for attribute, _ in attributes:
             if attribute in config:
-                logger.info(f"Strategy using {attribute}: {config[attribute]}")
+                logger.info(f"策略配置 {attribute}：{config[attribute]}")
 
         StrategyResolver._normalize_attributes(strategy)
 
@@ -109,8 +109,7 @@ class StrategyResolver(IResolver):
             # Ensure Properties are not overwritten
             setattr(strategy, attribute, config[attribute])
             logger.info(
-                f"Override strategy '{attribute}' with value from the configuration: "
-                f"{config[attribute]}.",
+                f"使用配置文件中的值覆盖策略参数“{attribute}”：{config[attribute]}。",
             )
         elif hasattr(strategy, attribute):
             val = getattr(strategy, attribute)

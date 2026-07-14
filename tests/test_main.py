@@ -85,8 +85,8 @@ def test_main_fatal_exception(mocker, default_conf, caplog) -> None:
     # Test Main + the KeyboardInterrupt exception
     with pytest.raises(SystemExit):
         main(args)
-    assert log_has("Using config: tests/testdata/testconfigs/main_test_config.json ...", caplog)
-    assert log_has("Fatal exception!", caplog)
+    assert log_has("正在读取配置文件：tests/testdata/testconfigs/main_test_config.json", caplog)
+    assert log_has("发生严重异常！", caplog)
 
 
 def test_main_keyboard_interrupt(mocker, default_conf, caplog) -> None:
@@ -103,8 +103,8 @@ def test_main_keyboard_interrupt(mocker, default_conf, caplog) -> None:
     # Test Main + the KeyboardInterrupt exception
     with pytest.raises(SystemExit):
         main(args)
-    assert log_has("Using config: tests/testdata/testconfigs/main_test_config.json ...", caplog)
-    assert log_has("SIGINT received, aborting ...", caplog)
+    assert log_has("正在读取配置文件：tests/testdata/testconfigs/main_test_config.json", caplog)
+    assert log_has("收到中断信号，正在停止。", caplog)
 
 
 def test_main_operational_exception(mocker, default_conf, caplog) -> None:
@@ -123,7 +123,7 @@ def test_main_operational_exception(mocker, default_conf, caplog) -> None:
     # Test Main + the KeyboardInterrupt exception
     with pytest.raises(SystemExit):
         main(args)
-    assert log_has("Using config: tests/testdata/testconfigs/main_test_config.json ...", caplog)
+    assert log_has("正在读取配置文件：tests/testdata/testconfigs/main_test_config.json", caplog)
     assert log_has("Oh snap!", caplog)
 
 
@@ -141,7 +141,7 @@ def test_main_operational_exception1(mocker, default_conf, caplog) -> None:
     with pytest.raises(SystemExit):
         main(args)
 
-    assert log_has("Fatal exception!", caplog)
+    assert log_has("发生严重异常！", caplog)
     assert not log_has_re(r"SIGINT.*", caplog)
     mocker.patch(
         "freqtrade.exchange.list_available_exchanges",
@@ -150,7 +150,7 @@ def test_main_operational_exception1(mocker, default_conf, caplog) -> None:
     with pytest.raises(SystemExit):
         main(args)
 
-    assert log_has_re(r"SIGINT.*", caplog)
+    assert log_has_re(r"收到中断信号.*", caplog)
 
 
 def test_main_ConfigurationError(mocker, default_conf, caplog) -> None:
@@ -166,7 +166,7 @@ def test_main_ConfigurationError(mocker, default_conf, caplog) -> None:
     # Test Main + the KeyboardInterrupt exception
     with pytest.raises(SystemExit):
         main(args)
-    assert log_has_re("Configuration error: Oh snap!", caplog)
+    assert log_has_re("配置错误：Oh snap!", caplog)
 
 
 def test_main_reload_config(mocker, default_conf, caplog) -> None:
@@ -196,7 +196,7 @@ def test_main_reload_config(mocker, default_conf, caplog) -> None:
     with pytest.raises(SystemExit):
         main(["trade", "-c", "tests/testdata/testconfigs/main_test_config.json"])
 
-    assert log_has("Using config: tests/testdata/testconfigs/main_test_config.json ...", caplog)
+    assert log_has("正在读取配置文件：tests/testdata/testconfigs/main_test_config.json", caplog)
     assert worker_mock.call_count == 4
     assert reconfigure_mock.call_count == 1
     assert isinstance(worker.freqtrade, FreqtradeBot)

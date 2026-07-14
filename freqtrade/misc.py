@@ -41,13 +41,13 @@ def file_dump_json(filename: Path, data: Any, is_zip: bool = False, log: bool = 
         if filename.suffix != ".gz":
             filename = filename.with_suffix(".gz")
         if log:
-            logger.info(f'dumping json to "{filename}"')
+            logger.info(f'正在写入 JSON 文件“{filename}”')
 
         with gzip.open(filename, "wt", encoding="utf-8") as fpz:
             dump_json_to_file(fpz, data)
     else:
         if log:
-            logger.info(f'dumping json to "{filename}"')
+            logger.info(f'正在写入 JSON 文件“{filename}”')
         with filename.open("w") as fp:
             dump_json_to_file(fp, data)
 

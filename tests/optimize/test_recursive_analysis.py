@@ -172,7 +172,7 @@ def test_recursive_biased_strategy(recursive_conf, mocker, caplog, scenario) -> 
     instance = RecursiveAnalysis(recursive_conf, strategy_obj)
     instance.start(get_progress_tracker())
     # Assert init correct
-    assert log_has_re(f"Strategy Parameter: scenario = {scenario}", caplog)
+    assert log_has_re(f"策略参数：scenario = {scenario}", caplog)
 
     if scenario == "bias2":
         assert log_has_re("=> found lookahead in indicator rsi", caplog)

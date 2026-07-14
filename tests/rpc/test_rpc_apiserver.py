@@ -3292,7 +3292,7 @@ def test_api_backtesting(botclient, mocker, fee, caplog, tmp_path):
         rc = client_post(client, f"{BASE_URI}/backtest", data=data)
         assert_response(rc)
         result = rc.json()
-        assert log_has_re("Reusing result of previous backtest.*", caplog)
+        assert log_has_re("复用策略.*的历史回测结果。", caplog)
 
         data["stake_amount"] = 101
 
@@ -3301,7 +3301,7 @@ def test_api_backtesting(botclient, mocker, fee, caplog, tmp_path):
             side_effect=ConfigurationError("DeadBeef22"),
         )
         rc = client_post(client, f"{BASE_URI}/backtest", data=data)
-        assert log_has("Backtesting encountered a configuration Error: DeadBeef22", caplog)
+        assert log_has("回测遇到配置错误：DeadBeef22", caplog)
 
         data["stake_amount"] = 102
         mocker.patch(
@@ -3309,7 +3309,7 @@ def test_api_backtesting(botclient, mocker, fee, caplog, tmp_path):
             side_effect=DependencyException("DeadBeef"),
         )
         rc = client_post(client, f"{BASE_URI}/backtest", data=data)
-        assert log_has("Backtesting caused an error: DeadBeef", caplog)
+        assert log_has("回测发生错误：DeadBeef", caplog)
 
         rc = client_get(client, f"{BASE_URI}/backtest")
         assert_response(rc)

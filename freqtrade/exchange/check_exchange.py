@@ -28,7 +28,7 @@ def check_exchange(config: Config, check_for_bad: bool = True) -> bool:
     ] and not config.get("exchange", {}).get("name"):
         # Skip checking exchange in plot mode, since it requires no exchange
         return True
-    logger.info("Checking exchange...")
+    logger.info("正在检查交易所配置。")
 
     exchange = config.get("exchange", {}).get("name", "").lower()
     if not exchange:
@@ -58,7 +58,7 @@ def check_exchange(config: Config, check_for_bad: bool = True) -> bool:
 
     if MAP_EXCHANGE_CHILDCLASS.get(exchange, exchange) in SUPPORTED_EXCHANGES:
         logger.info(
-            f'Exchange "{exchange}" is officially supported by the Freqtrade development team.'
+            f'交易所“{exchange}”已获得 Freqtrade 开发团队的官方支持。'
         )
     else:
         logger.warning(

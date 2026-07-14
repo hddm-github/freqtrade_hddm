@@ -18,6 +18,13 @@ from freqtrade.exceptions import OperationalException
 
 logger = logging.getLogger(__name__)
 
+_OBJECT_TYPE_ZH = {
+    "IStrategy": "策略",
+    "IPairList": "交易对列表",
+    "IHyperOptLoss": "参数优化损失函数",
+    "IFreqaiModel": "FreqAI 模型",
+}
+
 
 class PathModifier:
     def __init__(self, path: Path):
@@ -177,13 +184,15 @@ class IResolver:
                     directory=_path, object_name=object_name, add_source=add_source
                 )
                 if module:
+                    object_type = _OBJECT_TYPE_ZH.get(
+                        cls.object_type.__name__, cls.object_type.__name__.lstrip("I")
+                    )
                     logger.info(
-                        f"Using resolved {cls.object_type.__name__.lower()[1:]} {object_name} "
-                        f"from '{module_path}'..."
+                        f"已从“{module_path}”加载{object_type}：{object_name}。"
                     )
                     return module(**kwargs)
             except FileNotFoundError:
-                logger.warning('Path "%s" does not exist.', _path.resolve())
+                logger.warning('路径“%s”不存在。', _path.resolve())
 
         return None
 

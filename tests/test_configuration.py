@@ -462,12 +462,12 @@ def test_setup_configuration_without_arguments(mocker, default_conf, caplog) -> 
     assert "pair_whitelist" in config["exchange"]
     assert "datadir" in config
     assert "user_data_dir" in config
-    assert log_has("Using data directory: {} ...".format(config["datadir"]), caplog)
+    assert log_has("历史数据目录：{}".format(config["datadir"]), caplog)
     assert "timeframe" in config
-    assert not log_has("Parameter -i/--timeframe detected ...", caplog)
+    assert not log_has("检测到参数 -i/--timeframe", caplog)
 
     assert "position_stacking" not in config
-    assert not log_has("Parameter --enable-position-stacking detected ...", caplog)
+    assert not log_has("检测到参数 --enable-position-stacking", caplog)
 
     assert "timerange" not in config
 
@@ -510,21 +510,23 @@ def test_setup_configuration_with_arguments(mocker, default_conf, caplog, tmp_pa
     assert "exchange" in config
     assert "pair_whitelist" in config["exchange"]
     assert "datadir" in config
-    assert log_has("Using data directory: {} ...".format("/foo/bar"), caplog)
-    assert log_has(f"Using user-data directory: {tmp_path / 'freqtrade'} ...", caplog)
+    assert log_has("历史数据目录：{}".format("/foo/bar"), caplog)
+    assert log_has(f"用户数据目录：{tmp_path / 'freqtrade'}", caplog)
     assert "user_data_dir" in config
 
     assert "timeframe" in config
-    assert log_has("Parameter -i/--timeframe detected ... Using timeframe: 1m ...", caplog)
+    assert log_has("检测到参数 -i/--timeframe，使用 K 线周期：1m。", caplog)
 
     assert "position_stacking" in config
-    assert log_has("Parameter --enable-position-stacking detected ...", caplog)
+    assert log_has("检测到参数 --enable-position-stacking，允许同一交易对重复开仓。", caplog)
 
     assert "timerange" in config
-    assert log_has("Parameter --timerange detected: {} ...".format(config["timerange"]), caplog)
+    assert log_has(
+        "检测到参数 --timerange，回测时间范围：{}。".format(config["timerange"]), caplog
+    )
 
     assert "export" in config
-    assert log_has("Parameter --export detected: {} ...".format(config["export"]), caplog)
+    assert log_has("检测到参数 --export：{}。".format(config["export"]), caplog)
     assert "stake_amount" in config
     assert config["stake_amount"] == "unlimited"
 
@@ -559,19 +561,19 @@ def test_setup_configuration_with_stratlist(mocker, default_conf, caplog) -> Non
     assert "exchange" in config
     assert "pair_whitelist" in config["exchange"]
     assert "datadir" in config
-    assert log_has("Using data directory: {} ...".format(config["datadir"]), caplog)
+    assert log_has("历史数据目录：{}".format(config["datadir"]), caplog)
     assert "timeframe" in config
-    assert log_has("Parameter -i/--timeframe detected ... Using timeframe: 1m ...", caplog)
+    assert log_has("检测到参数 -i/--timeframe，使用 K 线周期：1m。", caplog)
 
     assert "strategy_list" in config
-    assert log_has("Using strategy list of 2 strategies", caplog)
+    assert log_has("使用包含 2 个策略的策略列表。", caplog)
 
     assert "position_stacking" not in config
 
     assert "timerange" not in config
 
     assert "export" in config
-    assert log_has("Parameter --export detected: {} ...".format(config["export"]), caplog)
+    assert log_has("检测到参数 --export：{}。".format(config["export"]), caplog)
 
 
 def test_hyperopt_with_arguments(mocker, default_conf, caplog) -> None:
@@ -614,7 +616,7 @@ def test_cli_verbose_with_params(default_conf, mocker, caplog) -> None:
     validated_conf = configuration.load_config()
 
     assert validated_conf.get("verbosity") == 3
-    assert log_has("Verbosity set to 3", caplog)
+    assert log_has("日志详细级别设置为 3。", caplog)
 
 
 @pytest.mark.usefixtures("keep_log_config_loggers")

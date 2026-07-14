@@ -190,7 +190,7 @@ def load_backtest_stats(
 
     if not fn.is_file():
         raise ValueError(f"File or directory {fn} does not exist.")
-    logger.info(f"Loading backtest result from {fn}")
+    logger.info(f"正在从“{fn}”加载回测结果。")
 
     if fn.suffix == ".zip":
         data = json_load(

@@ -162,12 +162,12 @@ def test_setup_optimize_configuration_without_arguments(mocker, default_conf, ca
     assert "exchange" in config
     assert "pair_whitelist" in config["exchange"]
     assert "datadir" in config
-    assert log_has("Using data directory: {} ...".format(config["datadir"]), caplog)
+    assert log_has("历史数据目录：{}".format(config["datadir"]), caplog)
     assert "timeframe" in config
     assert not log_has_re("Parameter -i/--ticker-interval detected .*", caplog)
 
     assert "position_stacking" not in config
-    assert not log_has("Parameter --enable-position-stacking detected ...", caplog)
+    assert not log_has("检测到参数 --enable-position-stacking", caplog)
 
     assert "timerange" not in config
     assert "export" in config
@@ -208,26 +208,28 @@ def test_setup_bt_configuration_with_arguments(mocker, default_conf, caplog) -> 
     assert "datadir" in config
     assert config["runmode"] == RunMode.BACKTEST
 
-    assert log_has("Using data directory: {} ...".format(config["datadir"]), caplog)
+    assert log_has("历史数据目录：{}".format(config["datadir"]), caplog)
     assert "timeframe" in config
-    assert log_has("Parameter -i/--timeframe detected ... Using timeframe: 1m ...", caplog)
+    assert log_has("检测到参数 -i/--timeframe，使用 K 线周期：1m。", caplog)
 
     assert "position_stacking" in config
-    assert log_has("Parameter --enable-position-stacking detected ...", caplog)
+    assert log_has("检测到参数 --enable-position-stacking，允许同一交易对重复开仓。", caplog)
 
     assert "timerange" in config
-    assert log_has("Parameter --timerange detected: {} ...".format(config["timerange"]), caplog)
+    assert log_has(
+        "检测到参数 --timerange，回测时间范围：{}。".format(config["timerange"]), caplog
+    )
 
     assert "export" in config
     assert "exportfilename" in config
     assert isinstance(config["exportfilename"], Path)
-    assert log_has("Storing backtest results to {} ...".format(config["exportfilename"]), caplog)
+    assert log_has("回测结果将保存到：{}".format(config["exportfilename"]), caplog)
     assert log_has_re(
         "DEPRECATED: Using `--export-filename` has no impact when backtesting.*", caplog
     )
 
     assert "fee" in config
-    assert log_has("Parameter --fee detected, setting fee to: {} ...".format(config["fee"]), caplog)
+    assert log_has("检测到参数 --fee，手续费率设置为：{}。".format(config["fee"]), caplog)
 
 
 def test_setup_optimize_configuration_stake_amount(mocker, default_conf, caplog) -> None:
@@ -259,7 +261,7 @@ def test_setup_optimize_configuration_stake_amount(mocker, default_conf, caplog)
         "--starting-balance",
         "0.5",
     ]
-    with pytest.raises(OperationalException, match=r"Starting balance .* smaller .*"):
+    with pytest.raises(OperationalException, match=r"初始可用余额.*小于每笔投入金额"):
         setup_optimize_configuration(get_args(args), RunMode.BACKTEST)
 
 
@@ -279,7 +281,7 @@ def test_start(mocker, fee, default_conf, caplog) -> None:
     ]
     pargs = get_args(args)
     start_backtesting(pargs)
-    assert log_has("Starting freqtrade in Backtesting mode", caplog)
+    assert log_has("正在以回测模式启动 Freqtrade。", caplog)
     assert start_mock.call_count == 1
 
 
@@ -313,7 +315,7 @@ def test_backtesting_init_no_timeframe(mocker, default_conf, caplog) -> None:
 
     mocker.patch(f"{EXMS}.get_fee", MagicMock(return_value=0.5))
     with pytest.raises(
-        OperationalException, match=r"Timeframe needs to be set in either configuration"
+        OperationalException, match=r"必须在配置文件中设置 K 线周期"
     ):
         Backtesting(default_conf)
 
@@ -418,7 +420,7 @@ def test_backtesting_start(default_conf, mocker, caplog) -> None:
     backtesting.strategy.bot_start = MagicMock()
     backtesting.start()
     # check the logs, that will contain the backtest result
-    exists = ["Backtesting with data from 2017-11-14 21:17:00 up to 2017-11-14 22:59:00 (0 days)."]
+    exists = ["实际回测数据区间：2017-11-14 21:17:00 至 2017-11-14 22:59:00，共 0 天。"]
     for line in exists:
         assert log_has(line, caplog)
     assert backtesting.strategy.dp._pairlists is not None
@@ -470,7 +472,7 @@ def test_backtesting_no_pair_left(default_conf, mocker) -> None:
     default_conf["export"] = "none"
     default_conf["timerange"] = "20180101-20180102"
 
-    with pytest.raises(OperationalException, match=r"No pair in whitelist\."):
+    with pytest.raises(OperationalException, match=r"交易对白名单为空。"):
         Backtesting(default_conf)
 
     default_conf.update(
@@ -480,9 +482,7 @@ def test_backtesting_no_pair_left(default_conf, mocker) -> None:
         }
     )
 
-    with pytest.raises(
-        OperationalException, match=r"Detail timeframe must be smaller than strategy timeframe\."
-    ):
+    with pytest.raises(OperationalException, match=r"回测细节周期必须小于策略主周期。"):
         Backtesting(default_conf)
 
 
@@ -508,7 +508,7 @@ def test_backtesting_pairlist_list(default_conf, mocker, tickers) -> None:
     default_conf["pairlists"] = [{"method": "VolumePairList", "number_assets": 5}]
     with pytest.raises(
         OperationalException,
-        match=r"VolumePairList not allowed for backtesting\..*StaticPairList.*",
+        match=r"回测不允许使用 VolumePairList，请改用 StaticPairList。",
     ):
         Backtesting(default_conf)
 
@@ -522,7 +522,7 @@ def test_backtesting_pairlist_list(default_conf, mocker, tickers) -> None:
     default_conf["strategy_list"] = [CURRENT_TEST_STRATEGY, "StrategyTestV2"]
     with pytest.raises(
         OperationalException,
-        match=r"PrecisionFilter not allowed for backtesting multiple strategies\.",
+        match=r"多策略回测不允许使用 PrecisionFilter。",
     ):
         Backtesting(default_conf)
 
@@ -2067,12 +2067,12 @@ def test_backtest_start_timerange(default_conf, mocker, caplog, testdatadir):
     start_backtesting(args)
     # check the logs, that will contain the backtest result
     exists = [
-        "Parameter -i/--timeframe detected ... Using timeframe: 1m ...",
-        "Parameter --timerange detected: 1510694220-1510700340 ...",
-        f"Using data directory: {testdatadir} ...",
-        "Loading data from 2017-11-14 20:57:00 up to 2017-11-14 22:59:00 (0 days).",
-        "Backtesting with data from 2017-11-14 21:17:00 up to 2017-11-14 22:59:00 (0 days).",
-        "Parameter --enable-position-stacking detected ...",
+        "检测到参数 -i/--timeframe，使用 K 线周期：1m。",
+        "检测到参数 --timerange，回测时间范围：1510694220-1510700340。",
+        f"历史数据目录：{testdatadir}",
+        "正在加载 2017-11-14 20:57:00 至 2017-11-14 22:59:00 的数据，共 0 天。",
+        "实际回测数据区间：2017-11-14 21:17:00 至 2017-11-14 22:59:00，共 0 天。",
+        "检测到参数 --enable-position-stacking，允许同一交易对重复开仓。",
     ]
 
     for line in exists:
@@ -2156,14 +2156,14 @@ def test_backtest_start_multi_strat(default_conf, mocker, caplog, testdatadir):
 
     # check the logs, that will contain the backtest result
     exists = [
-        "Parameter -i/--timeframe detected ... Using timeframe: 1m ...",
-        "Parameter --timerange detected: 1510694220-1510700340 ...",
-        f"Using data directory: {testdatadir} ...",
-        "Loading data from 2017-11-14 20:57:00 up to 2017-11-14 22:59:00 (0 days).",
-        "Backtesting with data from 2017-11-14 21:17:00 up to 2017-11-14 22:59:00 (0 days).",
-        "Parameter --enable-position-stacking detected ...",
-        f"Running backtesting for Strategy {CURRENT_TEST_STRATEGY}",
-        "Running backtesting for Strategy StrategyTestV2",
+        "检测到参数 -i/--timeframe，使用 K 线周期：1m。",
+        "检测到参数 --timerange，回测时间范围：1510694220-1510700340。",
+        f"历史数据目录：{testdatadir}",
+        "正在加载 2017-11-14 20:57:00 至 2017-11-14 22:59:00 的数据，共 0 天。",
+        "实际回测数据区间：2017-11-14 21:17:00 至 2017-11-14 22:59:00，共 0 天。",
+        "检测到参数 --enable-position-stacking，允许同一交易对重复开仓。",
+        f"正在回测策略 {CURRENT_TEST_STRATEGY}",
+        "正在回测策略 StrategyTestV2",
     ]
 
     for line in exists:
@@ -2288,26 +2288,26 @@ def test_backtest_start_multi_strat_nomock(default_conf, mocker, caplog, testdat
 
     # check the logs, that will contain the backtest result
     exists = [
-        "Parameter -i/--timeframe detected ... Using timeframe: 1m ...",
-        "Parameter --timerange detected: 1510694220-1510700340 ...",
-        f"Using data directory: {testdatadir} ...",
-        "Loading data from 2017-11-14 20:57:00 up to 2017-11-14 22:59:00 (0 days).",
-        "Backtesting with data from 2017-11-14 21:17:00 up to 2017-11-14 22:59:00 (0 days).",
-        "Parameter --enable-position-stacking detected ...",
-        f"Running backtesting for Strategy {CURRENT_TEST_STRATEGY}",
-        "Running backtesting for Strategy StrategyTestV2",
+        "检测到参数 -i/--timeframe，使用 K 线周期：1m。",
+        "检测到参数 --timerange，回测时间范围：1510694220-1510700340。",
+        f"历史数据目录：{testdatadir}",
+        "正在加载 2017-11-14 20:57:00 至 2017-11-14 22:59:00 的数据，共 0 天。",
+        "实际回测数据区间：2017-11-14 21:17:00 至 2017-11-14 22:59:00，共 0 天。",
+        "检测到参数 --enable-position-stacking，允许同一交易对重复开仓。",
+        f"正在回测策略 {CURRENT_TEST_STRATEGY}",
+        "正在回测策略 StrategyTestV2",
     ]
 
     for line in exists:
         assert log_has(line, caplog)
 
     captured = capsys.readouterr()
-    assert "BACKTESTING REPORT" in captured.out
-    assert "EXIT REASON STATS" in captured.out
-    assert "DAY BREAKDOWN" in captured.out
-    assert "LEFT OPEN TRADES REPORT" in captured.out
-    assert "2017-11-14 21:17:00 -> 2017-11-14 22:59:00 | Max open trades : 1" in captured.out
-    assert "STRATEGY SUMMARY" in captured.out
+    assert "回测总览" in captured.out
+    assert "退出原因统计" in captured.out
+    assert "按日期拆分统计" in captured.out
+    assert "回测结束时未平仓交易" in captured.out
+    assert "回测区间 2017-11-14 21:17:00 -> 2017-11-14 22:59:00 | 最大同时持仓数：1" in captured.out
+    assert "策略对比汇总" in captured.out
 
 
 @pytest.mark.filterwarnings("ignore:deprecated")
@@ -2346,7 +2346,7 @@ def test_backtest_start_futures_noliq(default_conf_usdt, mocker, caplog, testdat
         "1h",
     ]
     args = get_args(args)
-    with pytest.raises(OperationalException, match=r"Pairs .* got no leverage tiers available\."):
+    with pytest.raises(OperationalException, match=r"交易对 .* 没有可用的杠杆档位"):
         start_backtesting(args)
 
 
@@ -2465,21 +2465,21 @@ def test_backtest_start_nomock_futures(default_conf_usdt, mocker, caplog, testda
 
     # check the logs, that will contain the backtest result
     exists = [
-        "Parameter -i/--timeframe detected ... Using timeframe: 1h ...",
-        f"Using data directory: {testdatadir} ...",
-        "Loading data from 2021-11-17 01:00:00 up to 2021-11-21 04:00:00 (4 days).",
-        "Backtesting with data from 2021-11-17 21:00:00 up to 2021-11-21 04:00:00 (3 days).",
-        "XRP/USDT:USDT, funding_rate, 1h, data starts at 2021-11-18 00:00:00",
-        f"Running backtesting for Strategy {CURRENT_TEST_STRATEGY}",
+        "检测到参数 -i/--timeframe，使用 K 线周期：1h。",
+        f"历史数据目录：{testdatadir}",
+        "正在加载 2021-11-17 01:00:00 至 2021-11-21 04:00:00 的数据，共 4 天。",
+        "实际回测数据区间：2021-11-17 21:00:00 至 2021-11-21 04:00:00，共 3 天。",
+        "XRP/USDT:USDT（funding_rate，1h）的数据起始于 2021-11-18 00:00:00。",
+        f"正在回测策略 {CURRENT_TEST_STRATEGY}",
     ]
 
     for line in exists:
         assert log_has(line, caplog), line
 
     captured = capsys.readouterr()
-    assert "BACKTESTING REPORT" in captured.out
-    assert "EXIT REASON STATS" in captured.out
-    assert "LEFT OPEN TRADES REPORT" in captured.out
+    assert "回测总览" in captured.out
+    assert "退出原因统计" in captured.out
+    assert "回测结束时未平仓交易" in captured.out
 
 
 @pytest.mark.filterwarnings("ignore:deprecated")
@@ -2600,21 +2600,21 @@ def test_backtest_start_multi_strat_nomock_detail(
 
     # check the logs, that will contain the backtest result
     exists = [
-        "Parameter -i/--timeframe detected ... Using timeframe: 5m ...",
-        "Parameter --timeframe-detail detected, using 1m for intra-candle backtesting ...",
-        f"Using data directory: {testdatadir} ...",
-        "Loading data from 2019-10-11 00:00:00 up to 2019-10-13 11:15:00 (2 days).",
-        "Backtesting with data from 2019-10-11 01:40:00 up to 2019-10-13 11:15:00 (2 days).",
-        f"Running backtesting for Strategy {CURRENT_TEST_STRATEGY}",
+        "检测到参数 -i/--timeframe，使用 K 线周期：5m。",
+        "检测到参数 --timeframe-detail，使用 1m 进行 K 线内部精细回测。",
+        f"历史数据目录：{testdatadir}",
+        "正在加载 2019-10-11 00:00:00 至 2019-10-13 11:15:00 的数据，共 2 天。",
+        "实际回测数据区间：2019-10-11 01:40:00 至 2019-10-13 11:15:00，共 2 天。",
+        f"正在回测策略 {CURRENT_TEST_STRATEGY}",
     ]
 
     for line in exists:
         assert log_has(line, caplog)
 
     captured = capsys.readouterr()
-    assert "BACKTESTING REPORT" in captured.out
-    assert "EXIT REASON STATS" in captured.out
-    assert "LEFT OPEN TRADES REPORT" in captured.out
+    assert "回测总览" in captured.out
+    assert "退出原因统计" in captured.out
+    assert "回测结束时未平仓交易" in captured.out
 
 
 @pytest.mark.filterwarnings("ignore:deprecated")
@@ -2723,11 +2723,11 @@ def test_backtest_start_multi_strat_caching(
 
     # check the logs, that will contain the backtest result
     exists = [
-        "Parameter -i/--timeframe detected ... Using timeframe: 1m ...",
-        "Parameter --timerange detected: 1510694220-1510700340 ...",
-        f"Using data directory: {testdatadir} ...",
-        "Loading data from 2017-11-14 20:57:00 up to 2017-11-14 22:59:00 (0 days).",
-        "Parameter --enable-position-stacking detected ...",
+        "检测到参数 -i/--timeframe，使用 K 线周期：1m。",
+        "检测到参数 --timerange，回测时间范围：1510694220-1510700340。",
+        f"历史数据目录：{testdatadir}",
+        "正在加载 2017-11-14 20:57:00 至 2017-11-14 22:59:00 的数据，共 0 天。",
+        "检测到参数 --enable-position-stacking，允许同一交易对重复开仓。",
     ]
 
     for line in exists:
@@ -2736,21 +2736,21 @@ def test_backtest_start_multi_strat_caching(
     if cache == "none":
         assert backtestmock.call_count == 2
         exists = [
-            "Running backtesting for Strategy StrategyTestV2",
-            "Running backtesting for Strategy StrategyTestV3",
-            "Backtesting with data from 2017-11-14 21:17:00 up to 2017-11-14 22:59:00 (0 days).",
+            "正在回测策略 StrategyTestV2",
+            "正在回测策略 StrategyTestV3",
+            "实际回测数据区间：2017-11-14 21:17:00 至 2017-11-14 22:59:00，共 0 天。",
         ]
     elif run_id == "2" and min_backtest_date < start_time:
         assert backtestmock.call_count == 0
         exists = [
-            "Reusing result of previous backtest for StrategyTestV2",
-            "Reusing result of previous backtest for StrategyTestV3",
+            "复用策略 StrategyTestV2 的历史回测结果。",
+            "复用策略 StrategyTestV3 的历史回测结果。",
         ]
     else:
         exists = [
-            "Reusing result of previous backtest for StrategyTestV2",
-            "Running backtesting for Strategy StrategyTestV3",
-            "Backtesting with data from 2017-11-14 21:17:00 up to 2017-11-14 22:59:00 (0 days).",
+            "复用策略 StrategyTestV2 的历史回测结果。",
+            "正在回测策略 StrategyTestV3",
+            "实际回测数据区间：2017-11-14 21:17:00 至 2017-11-14 22:59:00，共 0 天。",
         ]
         assert backtestmock.call_count == 1
 

@@ -53,6 +53,8 @@ def setup_logging_pre() -> None:
             bufferHandler,
         ],
     )
+    # NumExpr 会在回测模块首次导入时打印英文线程提示；默认级别下隐藏这条第三方信息。
+    logging.getLogger("numexpr.utils").setLevel(logging.WARNING)
 
 
 FT_LOGGING_CONFIG = {
@@ -99,6 +101,7 @@ def _set_log_levels(
         "asyncio": logging.INFO if verbosity <= 1 else logging.DEBUG,
         "httpcore": logging.INFO if verbosity <= 1 else logging.DEBUG,
         "ccxt.base.exchange": logging.INFO if verbosity <= 2 else logging.DEBUG,
+        "numexpr.utils": logging.WARNING,
         "telegram": logging.INFO,
         "httpx": logging.WARNING,
         "werkzeug": logging.ERROR if api_verbosity == "error" else logging.INFO,
@@ -222,12 +225,12 @@ def setup_logging(config: Config) -> None:
 
     # Set color system for console output
     if config.get("print_colorized", True):
-        logger.info("Enabling colorized output.")
+        logger.info("已启用彩色终端输出。")
         error_console._color_system = error_console._detect_color_system()
 
-    logger.info("Logfile configured")
+    logger.info("日志配置完成。")
 
     # Set verbosity levels
     logging.root.setLevel(logging.INFO if verbosity < 1 else logging.DEBUG)
 
-    logger.info("Verbosity set to %s", verbosity)
+    logger.info("日志详细级别设置为 %s。", verbosity)
