@@ -115,3 +115,7 @@ target/
 !config_examples/config_freqai.example.json
 
 docker-compose-*.yml
+user_data/config*.json
+user_data/*_pairs.json
+user_data/backtest*.json
+!user_data/config.json.example
