@@ -51,10 +51,10 @@ def check_exchange(config: Config, check_for_bad: bool = True) -> bool:
     if not valid:
         if check_for_bad:
             raise OperationalException(
-                f'Exchange "{exchange}" will not work with Freqtrade. Reason: {reason}.'
+                f'交易所"{exchange}" 无法与 Freqtrade 配合使用。原因: {reason}。'
             )
         else:
-            logger.warning(f'Exchange "{exchange}" will not work with Freqtrade. Reason: {reason}.')
+            logger.warning(f'交易所"{exchange}" 无法与 Freqtrade 配合使用。原因: {reason}。')
 
     if MAP_EXCHANGE_CHILDCLASS.get(exchange, exchange) in SUPPORTED_EXCHANGES:
         logger.info(

@@ -26,28 +26,28 @@ class RPCManager:
         config = freqtrade.config
         # Enable telegram
         if config.get("telegram", {}).get("enabled", False):
-            logger.info("Enabling rpc.telegram ...")
+            logger.info("启用 RPC:telegram ...")
             from freqtrade.rpc.telegram import Telegram
 
             self.registered_modules.append(Telegram(self._rpc, config))
 
         # Enable discord
         if config.get("discord", {}).get("enabled", False):
-            logger.info("Enabling rpc.discord ...")
+            logger.info("启用 RPC:discord ...")
             from freqtrade.rpc.discord import Discord
 
             self.registered_modules.append(Discord(self._rpc, config))
 
         # Enable Webhook
         if config.get("webhook", {}).get("enabled", False):
-            logger.info("Enabling rpc.webhook ...")
+            logger.info("启用 RPC:webhook ...")
             from freqtrade.rpc.webhook import Webhook
 
             self.registered_modules.append(Webhook(self._rpc, config))
 
         # Enable local rest api server for cmd line control
         if config.get("api_server", {}).get("enabled", False):
-            logger.info("Enabling rpc.api_server")
+            logger.info("启用 RPC:api_server")
             from freqtrade.rpc.api_server import ApiServer
 
             apiserver = ApiServer(config)
@@ -56,10 +56,10 @@ class RPCManager:
 
     def cleanup(self) -> None:
         """Stops all enabled rpc modules"""
-        logger.info("Cleaning up rpc modules ...")
+        logger.info("清理 RPC modules ...")
         while self.registered_modules:
             mod = self.registered_modules.pop()
-            logger.info(f"Cleaning up rpc.{mod.name} ...")
+            logger.info(f"清理 RPC.{mod.name} ...")
             mod.cleanup()
             del mod
 
@@ -73,7 +73,7 @@ class RPCManager:
         }
         """
         if msg.get("type") not in NO_ECHO_MESSAGES:
-            logger.info(f"Sending rpc message: {msg}")
+            logger.info(f"发送 RPC 消息: {msg}")
         for mod in self.registered_modules:
             logger.debug("Forwarding message to rpc.%s", mod.name)
             try:
@@ -89,7 +89,7 @@ class RPCManager:
         """
         while queue:
             msg = queue.popleft()
-            logger.info(f"Sending rpc strategy_msg: {msg}")
+            logger.info(f"发送策略消息: {msg}")
             for mod in self.registered_modules:
                 if mod._config.get(mod.name, {}).get("allow_custom_messages", False):
                     mod.send_msg(
@@ -121,13 +121,13 @@ class RPCManager:
         self.send_msg(
             {
                 "type": RPCMessageType.STARTUP,
-                "status": f"*Exchange:* `{exchange_name}`\n"
-                f"*Stake per trade:* `{stake_amount} {stake_currency}`\n"
-                f"*Minimum ROI:* `{minimal_roi}`\n"
+                "status": f"**交易所:** `{exchange_name}`\n"
+                f"**每笔投入:** `{stake_amount} {stake_currency}`\n"
+                f"**最小收益率:** `{minimal_roi}`\n"
                 f"*{'Trailing ' if trailing_stop else ''}Stoploss:* `{stoploss}`\n"
-                f"*Position adjustment:* `{pos_adjust_enabled}`\n"
-                f"*Timeframe:* `{timeframe}`\n"
-                f"*Strategy:* `{strategy_name}`",
+                f"**仓位调整:** `{pos_adjust_enabled}`\n"
+                f"**时间周期:** `{timeframe}`\n"
+                f"**策略:** `{strategy_name}`",
             }
         )
         self.send_msg(

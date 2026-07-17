@@ -32,7 +32,7 @@ class Worker:
         """
         Init all variables and objects the bot needs to work
         """
-        logger.info(f"Starting worker {__version__}")
+        logger.info(f"正在启动 Worker {__version__}")
 
         self._args = args
         self._config = config
@@ -94,7 +94,7 @@ class Worker:
                 self.freqtrade.notify_status(f"{state.name.lower()}")
 
             logger.info(
-                f"Changing state{f' from {old_state.name}' if old_state else ''} to: {state.name}"
+                f"状态变更{f' 从 {old_state.name}' if old_state else ''}为: {state.name}"
             )
             if state in (State.RUNNING, State.PAUSED) and old_state not in (
                 State.RUNNING,
@@ -136,7 +136,7 @@ class Worker:
                 if strategy_version is not None:
                     version += ", strategy_version: " + strategy_version
                 logger.info(
-                    f"Bot heartbeat. PID={getpid()}, version='{version}', state='{state.name}'"
+                    f"Bot 心跳检测。PID={getpid()}, 版本='{version}', 状态='{state.name}'"
                 )
                 self._heartbeat_msg = now
 
@@ -198,17 +198,17 @@ class Worker:
         try:
             self.freqtrade.process()
         except TemporaryError as error:
-            logger.warning(f"Error: {error}, retrying in {RETRY_TIMEOUT} seconds...")
+            logger.warning(f"错误: {error}，{RETRY_TIMEOUT} 秒后重试...")
             time.sleep(RETRY_TIMEOUT)
         except OperationalException:
             tb = traceback.format_exc()
-            hint = "Issue `/start` if you think it is safe to restart."
+            hint = "如果你认为可以安全重启，请输入 `/start`。"
 
             self.freqtrade.notify_status(
                 f"*OperationalException:*\n```\n{tb}```\n {hint}", msg_type=RPCMessageType.EXCEPTION
             )
 
-            logger.exception("OperationalException. Stopping trader ...")
+            logger.exception("操作异常。正在停止交易...")
             self.freqtrade.state = State.STOPPED
 
     def _reconfigure(self) -> None:
@@ -225,7 +225,7 @@ class Worker:
         # Load and validate config and create new instance of the bot
         self._init(True)
 
-        self.freqtrade.notify_status(f"{State(self.freqtrade.state)} after config reloaded")
+        self.freqtrade.notify_status(f"{State(self.freqtrade.state)} 配置重载后")
 
         # Tell systemd that we completed reconfiguration
         self._notify("READY=1")
@@ -235,5 +235,5 @@ class Worker:
         self._notify("STOPPING=1")
 
         if self.freqtrade:
-            self.freqtrade.notify_status("process died")
+            self.freqtrade.notify_status("进程终止")
             self.freqtrade.cleanup()

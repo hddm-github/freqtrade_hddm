@@ -701,7 +701,7 @@ class Exchange:
                 raise markets
             return None
         except TimeoutError as e:
-            logger.warning("Could not load markets. Reason: %s", e)
+            logger.warning("无法加载市场数据。原因: %s", e)
             raise TemporaryError from e
 
     def reload_markets(self, force: bool = False, *, load_leverage_tiers: bool = True) -> None:
@@ -740,7 +740,7 @@ class Exchange:
             if load_leverage_tiers and self.trading_mode == TradingMode.FUTURES:
                 self.fill_leverage_tiers()
         except (ccxt.BaseError, TemporaryError):
-            logger.exception("Could not load markets.")
+            logger.exception("无法加载市场数据。")
 
     def validate_stakecurrency(self, stake_currency: str) -> None:
         """
@@ -883,7 +883,7 @@ class Exchange:
             if not self.get_option("supports_demo_trading"):
                 raise ConfigurationError(f"Demo trading is not supported for {self.name}.")
             else:
-                logger.info(f"Demo trading enabled for {self.name}")
+                logger.info(f"模拟交易已启用: {self.name}")
 
     def validate_required_startup_candles(self, startup_candles: int, timeframe: str) -> int:
         """
@@ -979,7 +979,7 @@ class Exchange:
 
         if exchange_conf.get("_ft_has_params"):
             self._ft_has = deep_merge_dicts(exchange_conf.get("_ft_has_params"), self._ft_has)
-            logger.info("Overriding exchange._ft_has with config params, result: %s", self._ft_has)
+            logger.info("使用配置参数覆盖交易所 _ft_has，结果: %s", self._ft_has)
 
     def get_option(self, param: str, default: Any | None = None) -> Any:
         """
@@ -1821,11 +1821,11 @@ class Exchange:
             if self.is_cancel_order_result_suitable(corder):
                 return corder
         except InvalidOrderException:
-            logger.warning(f"Could not cancel order {order_id} for {pair}.")
+            logger.warning(f"无法取消 {pair} 的订单 {order_id}。")
         try:
             order = self.fetch_order(order_id, pair)
         except InvalidOrderException:
-            logger.warning(f"Could not fetch cancelled order {order_id}.")
+            logger.warning(f"无法获取已取消的订单 {order_id}.")
             order = {
                 "id": order_id,
                 "status": "canceled",
@@ -1855,7 +1855,7 @@ class Exchange:
         try:
             order = self.fetch_stoploss_order(order_id, pair)
         except InvalidOrderException:
-            logger.warning(f"Could not fetch cancelled stoploss order {order_id}.")
+            logger.warning(f"无法获取已取消的止损单 {order_id}.")
             order = {"id": order_id, "fee": {}, "status": "canceled", "amount": amount, "info": {}}
 
         return order
@@ -2641,7 +2641,7 @@ class Exchange:
             results = await asyncio.gather(*input_coro, return_exceptions=True)
             for res in results:
                 if isinstance(res, BaseException):
-                    logger.warning(f"Async code raised an exception: {repr(res)}")
+                    logger.warning(f"异步代码异常: {repr(res)}")
                     if raise_:
                         raise res
                     continue
@@ -2887,7 +2887,7 @@ class Exchange:
 
             for res in results:
                 if isinstance(res, Exception):
-                    logger.warning(f"Async code raised an exception: {repr(res)}")
+                    logger.warning(f"异步代码异常: {repr(res)}")
                     continue
                 # Deconstruct tuple (has 5 elements)
                 pair, timeframe, c_type, ticks, drop_hint = res
@@ -2998,7 +2998,7 @@ class Exchange:
                 if data and data[0][0] > data[-1][0]:
                     data = sorted(data, key=lambda x: x[0])
             except IndexError:
-                logger.exception("Error loading %s. Result was %s.", pair, data)
+                logger.exception("加载 %s 出错，结果为 %s。", pair, data)
                 return pair, timeframe, candle_type, [], self._ohlcv_partial_candle
             logger.debug("Done fetching pair %s, %s interval %s...", pair, candle_type, timeframe)
             return (
@@ -3190,7 +3190,7 @@ class Exchange:
                 )
 
             except Exception:
-                logger.exception(f"Refreshing TRADES data for {pair} failed")
+                logger.exception(f"刷新 {pair} 的交易数据失败")
                 return pairwt, None
 
             if new_ticks:
@@ -3209,7 +3209,7 @@ class Exchange:
                 )
                 return pairwt, trades_df
             else:
-                logger.error(f"No new ticks for {pair}")
+                logger.error(f"{pair} 没有新的成交记录")
         return pairwt, None
 
     def refresh_latest_trades(
@@ -3246,7 +3246,7 @@ class Exchange:
 
             for res in results:
                 if isinstance(res, Exception):
-                    logger.warning(f"Async code raised an exception: {repr(res)}")
+                    logger.warning(f"异步代码异常: {repr(res)}")
                     continue
                 pairwt, trades_df = res
                 if trades_df is not None:
@@ -3593,7 +3593,7 @@ class Exchange:
                         "This will take about a minute."
                     )
                 else:
-                    logger.info("Using cached leverage_tiers.")
+                    logger.info("使用缓存的杠杆层级。")
 
                 async def gather_results(input_coro):
                     return await asyncio.gather(*input_coro, return_exceptions=True)
@@ -3604,13 +3604,13 @@ class Exchange:
 
                     for res in results:
                         if isinstance(res, Exception):
-                            logger.warning(f"Leverage tier exception: {repr(res)}")
+                            logger.warning(f"杠杆层级异常: {repr(res)}")
                             continue
                         symbol, tier = res
                         tiers[symbol] = tier
                 if len(coros) > 0:
                     self.cache_leverage_tiers(tiers, self._config["stake_currency"])
-                logger.info(f"Done initializing {len(symbols)} markets.")
+                logger.info(f"{len(symbols)} 个市场初始化完成。")
 
                 return tiers
         return {}
@@ -3643,11 +3643,11 @@ class Exchange:
                 if updated:
                     updated_dt = parser.parse(updated)
                     if updated_dt < datetime.now(UTC) - cache_time:
-                        logger.info("Cached leverage tiers are outdated. Will update.")
+                        logger.info("缓存的杠杆层级已过期，将更新。")
                         return None
                 return tiers.get("data")
             except Exception:
-                logger.exception("Error loading cached leverage tiers. Refreshing.")
+                logger.exception("加载缓存的杠杆层级出错，正在刷新。")
         return None
 
     def fill_leverage_tiers(self) -> None:

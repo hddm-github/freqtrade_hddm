@@ -297,7 +297,7 @@ class ApiServer(RPCHandler):
         rest_ip = self._config["api_server"]["listen_ip_address"]
         rest_port = self._config["api_server"]["listen_port"]
 
-        logger.info(f"Starting HTTP Server at {rest_ip}:{rest_port}")
+        logger.info(f"HTTP 服务器已启动，地址 {rest_ip}:{rest_port}")
         if not ip_address(rest_ip).is_loopback and not running_in_docker():
             logger.warning("SECURITY WARNING - Local Rest Server listening to external connections")
             logger.warning(
@@ -321,7 +321,7 @@ class ApiServer(RPCHandler):
                 "Others may be able to log into your bot."
             )
 
-        logger.info("Starting Local Rest Server.")
+        logger.info("正在启动本地 REST 服务器。")
         verbosity = self._config["api_server"].get("verbosity", "error")
 
         uvconfig = uvicorn.Config(
